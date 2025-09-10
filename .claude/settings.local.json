@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder/**)",
+      "Read(/C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder/**)",
+      "Read(/C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder/**)",
+      "Read(/C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
