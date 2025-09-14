@@ -176,91 +176,91 @@ namespace BoonBuilder.Data
             // APHRODITE BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 1, Name = "Flutter Strike", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Attack, Description = "Your Attacks deal more damage to nearby foes", Effect = "Close-up Damage: +80%", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/c/ca/Flutter_Strike_II.png", Element = ElementType.Water, StatusEffect = "Weak" },
-                new Boon { BoonId = 2, Name = "Flutter Flourish", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Special, Description = "Your Specials deal more damage to nearby foes", Effect = "Close-up Damage: +100%", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/f/f1/Flutter_Flourish_II.png", Element = ElementType.Water, StatusEffect = "Weak" },
-                new Boon { BoonId = 3, Name = "Rapture Ring", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Cast, Description = "Your Casts inflict Weak and damage foes", Effect = "Cast Damage: 10 every 0.85 sec", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3a/Rapture_Ring_II.png", Element = ElementType.Air, StatusEffect = "Weak" },
-                new Boon { BoonId = 4, Name = "Passion Rush", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Sprint, Description = "Dashing damages surrounding foes", Effect = "Area Damage: 20", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5b/Passion_Rush_II.png", Element = ElementType.Air, StatusEffect = "Weak" },
-                new Boon { BoonId = 5, Name = "Glamour Gain", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Magick, Description = "Restore Magick while foes are Weak", Effect = "Magick: 6 per sec", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7c/Glamour_Gain_II.png", Element = ElementType.Air, StatusEffect = "Weak" }
+                new Boon { BoonId = 1, Name = "Flutter Strike", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Attack, Description = "Your Attacks deal more damage to nearby foes", Effect = "Close-up Damage: +80%", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/8/8e/Flutter_Strike_Aphrodite.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Weak" },
+                new Boon { BoonId = 2, Name = "Flutter Flourish", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Special, Description = "Your Specials deal more damage to nearby foes", Effect = "Close-up Damage: +100%", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/f/fc/Flutter_Flourish_Aphrodite.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Weak" },
+                new Boon { BoonId = 3, Name = "Rapture Ring", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Cast, Description = "Your Casts inflict Weak and damage foes", Effect = "Cast Damage: 10 every 0.85 sec", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/9/9f/Rapture_Ring_Aphrodite.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Weak" },
+                new Boon { BoonId = 4, Name = "Passion Rush", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Sprint, Description = "Dashing damages surrounding foes", Effect = "Area Damage: 20", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/5/59/Passion_Sprint_Aphrodite.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Weak" },
+                new Boon { BoonId = 5, Name = "Glamour Gain", Type = BoonType.Core, GodId = 1, Slot = BoonSlot.Magick, Description = "Restore Magick while foes are Weak", Effect = "Magick: 6 per sec", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/7/79/Glamour_Gain_Aphrodite.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Weak" }
             });
 
             // APOLLO BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 6, Name = "Nova Strike", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Attack, Description = "Attacks deal damage in larger area", Effect = "Area Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1e/Nova_Strike_II.png", Element = ElementType.Air, StatusEffect = "Daze" },
-                new Boon { BoonId = 7, Name = "Nova Flourish", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Special, Description = "Specials deal damage in larger area", Effect = "Area Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3f/Nova_Flourish_II.png", Element = ElementType.Air, StatusEffect = "Daze" },
-                new Boon { BoonId = 8, Name = "Solar Ring", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Cast, Description = "Casts inflict Daze and burst", Effect = "Burst Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5a/Solar_Ring_II.png", Element = ElementType.Air, StatusEffect = "Daze" },
-                new Boon { BoonId = 9, Name = "Blinding Rush", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Sprint, Description = "Sprint inflicts Daze", Effect = "Faster Sprint", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7b/Blinding_Rush_II.png", Element = ElementType.Air, StatusEffect = "Daze" },
-                new Boon { BoonId = 10, Name = "Lucid Gain", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Magick, Description = "Stand in Casts to restore Magick", Effect = "Instant Restore", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/9d/Lucid_Gain_II.png", Element = ElementType.Air }
+                new Boon { BoonId = 6, Name = "Nova Strike", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Attack, Description = "Attacks deal damage in larger area", Effect = "Area Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/c/cf/Nova_Flourish_Apollo.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Daze" },
+                new Boon { BoonId = 7, Name = "Nova Flourish", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Special, Description = "Specials deal damage in larger area", Effect = "Area Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/c/cf/Nova_Flourish_Apollo.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Daze" },
+                new Boon { BoonId = 8, Name = "Solar Ring", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Cast, Description = "Casts inflict Daze and burst", Effect = "Burst Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/2/22/Light_Smite_Apollo.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Daze" },
+                new Boon { BoonId = 9, Name = "Blinding Sprint", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Sprint, Description = "Sprint inflicts Daze", Effect = "Faster Sprint", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/6/6b/Blinding_Sprint_Apollo.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Daze" },
+                new Boon { BoonId = 10, Name = "Lucid Gain", Type = BoonType.Core, GodId = 2, Slot = BoonSlot.Magick, Description = "Stand in Casts to restore Magick", Effect = "Instant Restore", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/d/db/Lucid_Gain_Apollo.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air }
             });
 
             // ARES BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 11, Name = "Vicious Strike", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Attack, Description = "Attacks deal more damage and inflict Wounds", Effect = "+20% Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8d/Vicious_Strike_II.png", Element = ElementType.Fire, StatusEffect = "Wounds" },
-                new Boon { BoonId = 12, Name = "Vicious Flourish", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Special, Description = "Specials deal more damage and inflict Wounds", Effect = "+30% Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2f/Vicious_Flourish_II.png", Element = ElementType.Fire, StatusEffect = "Wounds" },
-                new Boon { BoonId = 13, Name = "Sword Ring", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Cast, Description = "Casts create falling blades", Effect = "Blade: 80", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4a/Sword_Ring_II.png", Element = ElementType.Fire, StatusEffect = "Wounds" },
-                new Boon { BoonId = 14, Name = "Stabbing Rush", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Sprint, Description = "Dash creates falling blades", Effect = "Blades: 30", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6b/Stabbing_Rush_II.png", Element = ElementType.Fire },
-                new Boon { BoonId = 15, Name = "Grisly Gain", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Magick, Description = "Weapon strikes spill Plasma", Effect = "10% Chance", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/9c/Grisly_Gain_II.png", Element = ElementType.Fire }
+                new Boon { BoonId = 11, Name = "Vicious Strike", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Attack, Description = "Attacks deal more damage and inflict Wounds", Effect = "+20% Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/e/e4/Vicious_Strike_Ares.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Wounds" },
+                new Boon { BoonId = 12, Name = "Vicious Flourish", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Special, Description = "Specials deal more damage and inflict Wounds", Effect = "+30% Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/bd/Vicious_Flourish_Ares.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Wounds" },
+                new Boon { BoonId = 13, Name = "Blade Rift", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Cast, Description = "Casts create falling blades", Effect = "Blade: 80", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/1/1a/Blade_Rift_Ares.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Wounds" },
+                new Boon { BoonId = 14, Name = "Battle Sprint", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Sprint, Description = "Sprint creates falling blades", Effect = "Blades: 30", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/9/99/Battle_Sprint_Ares.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire },
+                new Boon { BoonId = 15, Name = "Blood Frenzy", Type = BoonType.Core, GodId = 3, Slot = BoonSlot.Magick, Description = "Weapon strikes spill Blood", Effect = "10% Chance", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/1/1e/Blood_Frenzy_Ares.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire }
             });
 
             // DEMETER BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 16, Name = "Ice Strike", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Attack, Description = "Attacks inflict Freeze", Effect = "+30% Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2c/Ice_Strike_II.png", Element = ElementType.Water, StatusEffect = "Freeze" },
-                new Boon { BoonId = 17, Name = "Ice Flourish", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Special, Description = "Specials inflict Freeze", Effect = "+40% Damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4d/Ice_Flourish_II.png", Element = ElementType.Water, StatusEffect = "Freeze" },
-                new Boon { BoonId = 18, Name = "Arctic Ring", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Cast, Description = "Casts inflict Freeze repeatedly", Effect = "10 per 0.5 sec", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6e/Arctic_Ring_II.png", Element = ElementType.Water, StatusEffect = "Freeze" },
-                new Boon { BoonId = 19, Name = "Frigid Rush", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Sprint, Description = "Sprint forms lingering Gust", Effect = "4 per 0.25 sec", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8f/Frigid_Rush_II.png", Element = ElementType.Water },
-                new Boon { BoonId = 20, Name = "Tranquil Gain", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Magick, Description = "Restore Magick when inactive", Effect = "50% per sec", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0a/Tranquil_Gain_II.png", Element = ElementType.Water }
+                new Boon { BoonId = 16, Name = "Frost Strike", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Attack, Description = "Attacks inflict Freeze", Effect = "+30% Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/9/9f/Frost_Strike_Demeter.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Freeze" },
+                new Boon { BoonId = 17, Name = "Frost Flourish", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Special, Description = "Specials inflict Freeze", Effect = "+40% Damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/4/4d/Frost_Flourish_Demeter.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Freeze" },
+                new Boon { BoonId = 18, Name = "Frozen Touch", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Cast, Description = "Casts inflict Freeze repeatedly", Effect = "10 per 0.5 sec", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/5/5c/Frozen_Touch_Demeter.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Freeze" },
+                new Boon { BoonId = 19, Name = "Frigid Sprint", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Sprint, Description = "Sprint forms lingering frost", Effect = "4 per 0.25 sec", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/bb/Frigid_Sprint_Demeter.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water },
+                new Boon { BoonId = 20, Name = "Rare Crop", Type = BoonType.Core, GodId = 4, Slot = BoonSlot.Magick, Description = "Restore Magick when inactive", Effect = "50% per sec", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/5/5e/Rare_Crop_Demeter.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water }
             });
 
             // HEPHAESTUS BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 21, Name = "Volcanic Strike", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Attack, Description = "Attacks can cause blast", Effect = "Blast: 200", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1b/Volcanic_Strike_II.png", Element = ElementType.Fire, StatusEffect = "Glow" },
-                new Boon { BoonId = 22, Name = "Heaven Flourish", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Special, Description = "Specials can cause blast", Effect = "Blast: 400", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3c/Heaven_Flourish_II.png", Element = ElementType.Fire, StatusEffect = "Glow" },
-                new Boon { BoonId = 23, Name = "Anvil Ring", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Cast, Description = "Casts deal damage thrice", Effect = "Triple damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5d/Anvil_Ring_II.png", Element = ElementType.Fire },
-                new Boon { BoonId = 24, Name = "Smithy Rush", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Sprint, Description = "Post-dash blast", Effect = "Blast: 100", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7e/Smithy_Rush_II.png", Element = ElementType.Fire },
-                new Boon { BoonId = 25, Name = "Tough Gain", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Magick, Description = "Damage restores Magick", Effect = "150 Magick", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/9f/Tough_Gain_II.png", Element = ElementType.Fire }
+                new Boon { BoonId = 21, Name = "Volcanic Strike", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Attack, Description = "Attacks can cause blast", Effect = "Blast: 200", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/be/Volcanic_Strike_Hephaestus.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Glow" },
+                new Boon { BoonId = 22, Name = "Volcanic Flourish", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Special, Description = "Specials can cause blast", Effect = "Blast: 400", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/2/25/Volcanic_Flourish_Hephaestus.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Glow" },
+                new Boon { BoonId = 23, Name = "Molten Touch", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Cast, Description = "Casts deal damage thrice", Effect = "Triple damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/3/32/Molten_Touch_Hephaestus.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire },
+                new Boon { BoonId = 24, Name = "Forge Sprint", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Sprint, Description = "Post-dash blast", Effect = "Blast: 100", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/1/1c/Forge_Sprint_Hephaestus.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire },
+                new Boon { BoonId = 25, Name = "Smoldering Air", Type = BoonType.Core, GodId = 5, Slot = BoonSlot.Magick, Description = "Damage restores Magick", Effect = "150 Magick", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/6/6b/Smoldering_Air_Hephaestus.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire }
             });
 
             // HERA BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 26, Name = "Sworn Strike", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Attack, Description = "Attacks inflict Hitch", Effect = "Hitch damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2a/Sworn_Strike_II.png", Element = ElementType.Earth, StatusEffect = "Hitch" },
-                new Boon { BoonId = 27, Name = "Sworn Flourish", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Special, Description = "Specials inflict Hitch", Effect = "Hitch damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4b/Sworn_Flourish_II.png", Element = ElementType.Earth, StatusEffect = "Hitch" },
-                new Boon { BoonId = 28, Name = "Engagement Ring", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Cast, Description = "Casts inflict Hitch", Effect = "Hitch damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6c/Engagement_Ring_II.png", Element = ElementType.Earth, StatusEffect = "Hitch" },
-                new Boon { BoonId = 29, Name = "Nexus Rush", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Sprint, Description = "Sprint inflicts Hitch", Effect = "Hitch on contact", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8d/Nexus_Rush_II.png", Element = ElementType.Earth, StatusEffect = "Hitch" },
-                new Boon { BoonId = 30, Name = "Born Gain", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Magick, Description = "Prime to restore all Magick", Effect = "Magick restoration", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0e/Born_Gain_II.png", Element = ElementType.Earth }
+                new Boon { BoonId = 26, Name = "Nexus Strike", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Attack, Description = "Attacks inflict Hitch", Effect = "Hitch damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/a/a1/Nexus_Strike_Hera.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Earth, StatusEffect = "Hitch" },
+                new Boon { BoonId = 27, Name = "Nexus Flourish", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Special, Description = "Specials inflict Hitch", Effect = "Hitch damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/bf/Nexus_Flourish_Hera.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Earth, StatusEffect = "Hitch" },
+                new Boon { BoonId = 28, Name = "Engagement Ring", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Cast, Description = "Casts inflict Hitch", Effect = "Hitch damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/2/26/Engagement_Ring_Hera.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Earth, StatusEffect = "Hitch" },
+                new Boon { BoonId = 29, Name = "Nexus Sprint", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Sprint, Description = "Sprint inflicts Hitch", Effect = "Hitch on contact", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/4/44/Nexus_Sprint_Hera.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Earth, StatusEffect = "Hitch" },
+                new Boon { BoonId = 30, Name = "Greater Recall", Type = BoonType.Core, GodId = 6, Slot = BoonSlot.Magick, Description = "Prime to restore all Magick", Effect = "Magick restoration", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/7/7d/Greater_Recall_Hera.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Earth }
             });
 
             // HESTIA BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 31, Name = "Flame Strike", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Attack, Description = "Attacks inflict Scorch", Effect = "Scorch damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1f/Flame_Strike_II.png", Element = ElementType.Fire, StatusEffect = "Scorch" },
-                new Boon { BoonId = 32, Name = "Flame Flourish", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Special, Description = "Specials inflict Scorch", Effect = "Scorch damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3a/Flame_Flourish_II.png", Element = ElementType.Fire, StatusEffect = "Scorch" },
-                new Boon { BoonId = 33, Name = "Smolder Ring", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Cast, Description = "Casts repeatedly inflict Scorch", Effect = "Repeated Scorch", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/5/5b/Smolder_Ring_II.png", Element = ElementType.Fire, StatusEffect = "Scorch" },
-                new Boon { BoonId = 34, Name = "Heat Rush", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Sprint, Description = "Sprint destroys ranged shots", Effect = "Scorch on foes", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7c/Heat_Rush_II.png", Element = ElementType.Fire },
-                new Boon { BoonId = 35, Name = "Cardio Gain", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Magick, Description = "Damage restores Magick", Effect = "Magick restoration", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/9/9d/Cardio_Gain_II.png", Element = ElementType.Fire }
+                new Boon { BoonId = 31, Name = "Flame Strike", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Attack, Description = "Attacks inflict Scorch", Effect = "Scorch damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/1/1f/Flame_Strike_Hestia.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Scorch" },
+                new Boon { BoonId = 32, Name = "Flame Flourish", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Special, Description = "Specials inflict Scorch", Effect = "Scorch damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/5/54/Flame_Flourish_Hestia.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Scorch" },
+                new Boon { BoonId = 33, Name = "Hearth Gain", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Cast, Description = "Casts repeatedly inflict Scorch", Effect = "Repeated Scorch", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/6/6f/Hearth_Gain_Hestia.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire, StatusEffect = "Scorch" },
+                new Boon { BoonId = 34, Name = "Soot Sprint", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Sprint, Description = "Sprint destroys ranged shots", Effect = "Scorch on foes", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/3/3f/Soot_Sprint_Hestia.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire },
+                new Boon { BoonId = 35, Name = "Controlled Burn", Type = BoonType.Core, GodId = 7, Slot = BoonSlot.Magick, Description = "Damage restores Magick", Effect = "Magick restoration", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/7/78/Controlled_Burn_Hestia.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Fire }
             });
 
             // POSEIDON BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 36, Name = "Wave Strike", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Attack, Description = "Attacks hit with splash", Effect = "Splash damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/2e/Wave_Strike_II.png", Element = ElementType.Water, StatusEffect = "Slip" },
-                new Boon { BoonId = 37, Name = "Wave Flourish", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Special, Description = "Specials hit with splash", Effect = "Splash damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4f/Wave_Flourish_II.png", Element = ElementType.Water, StatusEffect = "Slip" },
-                new Boon { BoonId = 38, Name = "Tidal Ring", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Cast, Description = "Casts hit with powerful splash", Effect = "Splash damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6a/Tidal_Ring_II.png", Element = ElementType.Water },
-                new Boon { BoonId = 39, Name = "Breaker Sprint", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Sprint, Description = "Sprint knocks away foes", Effect = "Knockback damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8b/Breaker_Sprint_II.png", Element = ElementType.Water },
-                new Boon { BoonId = 40, Name = "Flood Gain", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Magick, Description = "Spirit Bubble appears", Effect = "Spirit Bubble", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0c/Flood_Gain_II.png", Element = ElementType.Water }
+                new Boon { BoonId = 36, Name = "Wave Strike", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Attack, Description = "Attacks hit with splash", Effect = "Splash damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/bf/Wave_Strike_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Slip" },
+                new Boon { BoonId = 37, Name = "Wave Flourish", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Special, Description = "Specials hit with splash", Effect = "Splash damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/a/a3/Wave_Flourish_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water, StatusEffect = "Slip" },
+                new Boon { BoonId = 38, Name = "Tidal Ring", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Cast, Description = "Casts hit with powerful splash", Effect = "Splash damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/7/73/Tidal_Ring_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water },
+                new Boon { BoonId = 39, Name = "Breaker Sprint", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Sprint, Description = "Sprint knocks away foes", Effect = "Knockback damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/4/4f/Breaker_Sprint_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water },
+                new Boon { BoonId = 40, Name = "Flood Gain", Type = BoonType.Core, GodId = 8, Slot = BoonSlot.Magick, Description = "Spirit Bubble appears", Effect = "Spirit Bubble", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/f/f9/Flood_Gain_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Water }
             });
 
             // ZEUS BOONS
             boons.AddRange(new List<Boon>
             {
-                new Boon { BoonId = 41, Name = "Heaven Strike", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Attack, Description = "Attacks inflict Blitz", Effect = "Blitz damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/21/Heaven_Strike_II.png", Element = ElementType.Air, StatusEffect = "Blitz" },
-                new Boon { BoonId = 42, Name = "Heaven Flourish", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Special, Description = "Specials inflict Blitz", Effect = "Blitz damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4d/Heaven_Flourish_II.png", Element = ElementType.Air, StatusEffect = "Blitz" },
-                new Boon { BoonId = 43, Name = "Storm Ring", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Cast, Description = "Casts cause lightning bolts", Effect = "Lightning bolt damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/6e/Storm_Ring_II.png", Element = ElementType.Air, StatusEffect = "Blitz" },
-                new Boon { BoonId = 44, Name = "Thunder Rush", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Sprint, Description = "Dashing causes lightning bolts", Effect = "Lightning bolt damage", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/8/8f/Thunder_Rush_II.png", Element = ElementType.Air },
-                new Boon { BoonId = 45, Name = "Ionic Gain", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Magick, Description = "Aether Font appears", Effect = "Magick restoration", IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0a/Ionic_Gain_II.png", Element = ElementType.Air }
+                new Boon { BoonId = 41, Name = "Heaven Strike", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Attack, Description = "Attacks inflict Blitz", Effect = "Blitz damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/b1/Heaven_Strike_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Blitz" },
+                new Boon { BoonId = 42, Name = "Heaven Flourish", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Special, Description = "Specials inflict Blitz", Effect = "Blitz damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/e/e8/Heaven_Flourish_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Blitz" },
+                new Boon { BoonId = 43, Name = "Storm Ring", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Cast, Description = "Casts cause lightning bolts", Effect = "Lightning bolt damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/5/56/Storm_Ring_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air, StatusEffect = "Blitz" },
+                new Boon { BoonId = 44, Name = "Thunder Rush", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Sprint, Description = "Dashing causes lightning bolts", Effect = "Lightning bolt damage", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/b/ba/Thunder_Rush_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air },
+                new Boon { BoonId = 45, Name = "Ionic Gain", Type = BoonType.Core, GodId = 9, Slot = BoonSlot.Magick, Description = "Aether Font appears", Effect = "Magick restoration", IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/1/15/Ionic_Gain_II.png?width=123&format=jpg&auto=webp&quality=100", Element = ElementType.Air }
             });
 
             return boons;
@@ -383,7 +383,7 @@ namespace BoonBuilder.Data
                     SecondGodId = 8, // Poseidon
                     Description = "+15% damage resistance",
                     Effect = "+15% damage resistance",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/1/1b/Island_Getaway_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/3/39/Island_Getaway_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Aether
                 },
                 new DuoBoon
@@ -407,7 +407,7 @@ namespace BoonBuilder.Data
                     SecondGodId = 9, // Zeus
                     Description = "+80% bonus Blitz damage",
                     Effect = "+80% Blitz damage",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/4/4c/Romantic_Spark_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/7/72/Romantic_Spark_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Aether
                 },
                 new DuoBoon
@@ -436,7 +436,7 @@ namespace BoonBuilder.Data
                     SecondGodId = 8, // Poseidon
                     Description = "300 blast damage after 2 seconds",
                     Effect = "300 blast damage",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/6/67/Beach_Ball_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/4/46/Beach_Ball_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Aether
                 },
                 new DuoBoon
@@ -460,7 +460,7 @@ namespace BoonBuilder.Data
                     SecondGodId = 9, // Zeus
                     Description = "Channel Magick into Ω Cast for repeated lightning",
                     Effect = "20 damage every 0.13 sec",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/2/21/Glorious_Disaster_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/2/27/Glorious_Disaster_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Aether
                 },
                 new DuoBoon
@@ -550,7 +550,7 @@ namespace BoonBuilder.Data
                     GodId = 8, // Poseidon
                     Description = "+200% splash damage vs Guardians (boss fights)",
                     Effect = "+200% splash vs bosses",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/3/3a/King_Tide_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/f/fe/King_Tide_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Water
                 },
                 new Boon
@@ -561,7 +561,7 @@ namespace BoonBuilder.Data
                     GodId = 9, // Zeus
                     Description = "20% chance for instant destruction of non-boss enemies",
                     Effect = "20% instant kill",
-                    IconUrl = "https://static.wikia.nocookie.net/hades_gamepedia_en/images/7/7c/Shocking_Loss_II.png",
+                    IconUrl = "https://oyster.ignimgs.com/mediawiki/apis.ign.com/hades-2/8/84/Shocking_Loss_II.png?width=123&format=jpg&auto=webp&quality=100",
                     Element = ElementType.Air
                 },
                 new Boon

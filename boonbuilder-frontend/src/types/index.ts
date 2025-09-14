@@ -17,11 +17,11 @@ export enum BoonType {
 }
 
 export enum BoonSlot {
-  Attack = 0,
-  Special = 1,
-  Cast = 2,
-  Sprint = 3,
-  Magick = 4
+  Attack = 1,
+  Special = 2,
+  Cast = 3,
+  Sprint = 4,
+  Magick = 6
 }
 
 export enum WeaponType {

@@ -53,10 +53,18 @@ const BoonBuilder: React.FC = () => {
     setSelectedBuild({ ...selectedBuild, boons: newBoons });
   };
 
+  const handleSelectWeapon = (weapon: Weapon, aspect: WeaponAspect) => {
+    setSelectedBuild({ ...selectedBuild, weapon, aspect });
+  };
+
   const handleRemoveBoon = (slot: BoonSlot) => {
     const newBoons = new Map(selectedBuild.boons);
     newBoons.delete(slot);
     setSelectedBuild({ ...selectedBuild, boons: newBoons });
+  };
+
+  const handleRemoveWeapon = () => {
+    setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined });
   };
 
   const renderLoadout = () => {
@@ -72,6 +80,37 @@ const BoonBuilder: React.FC = () => {
       <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm border border-purple-500/30 h-full flex flex-col">
         <h3 className="text-xl font-bold text-purple-300 mb-4">Current Loadout</h3>
         <div className="space-y-3 flex-1 overflow-y-auto">
+          {/* Weapon Section */}
+          <div className="flex items-center space-x-3 p-3 bg-gray-700/50 rounded-lg border-b border-gray-600">
+            <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
+              {selectedBuild.weapon ? (
+                <img
+                  src={selectedBuild.weapon.iconUrl}
+                  alt={selectedBuild.weapon.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-400 text-lg">⚔️</span>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-400">Weapon</div>
+              <div className="text-white font-medium">
+                {selectedBuild.weapon ? selectedBuild.weapon.name : 'No Weapon Selected'}
+              </div>
+              {selectedBuild.aspect && (
+                <div className="text-xs text-purple-300">{selectedBuild.aspect.name}</div>
+              )}
+            </div>
+            {selectedBuild.weapon && (
+              <button
+                onClick={handleRemoveWeapon}
+                className="text-red-400 hover:text-red-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
           {slots.map(({ slot, name, icon }) => {
             const boon = selectedBuild.boons.get(slot);
             return (
@@ -248,8 +287,12 @@ const BoonBuilder: React.FC = () => {
                 <RadialMenu
                   gods={gods}
                   boons={boons}
+                  weapons={weapons}
                   onSelectBoon={handleSelectBoon}
+                  onSelectWeapon={handleSelectWeapon}
                   selectedBoons={selectedBuild.boons}
+                  selectedWeapon={selectedBuild.weapon}
+                  selectedAspect={selectedBuild.aspect}
                 />
               </div>
 

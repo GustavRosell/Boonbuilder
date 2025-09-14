@@ -1,25 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { God, Boon, BoonSlot, RadialMenuItem } from '../types';
+import { God, Boon, BoonSlot, RadialMenuItem, Weapon, WeaponAspect } from '../types';
 
 interface RadialMenuProps {
   gods: God[];
   boons: Boon[];
+  weapons: Weapon[];
   onSelectBoon: (boon: Boon, slot: BoonSlot) => void;
+  onSelectWeapon: (weapon: Weapon, aspect: WeaponAspect) => void;
   selectedBoons: Map<BoonSlot, Boon>;
+  selectedWeapon?: Weapon;
+  selectedAspect?: WeaponAspect;
 }
 
-type MenuState = 'main' | 'weapon' | 'god' | 'boon';
+type MenuState = 'main' | 'weapon' | 'aspect' | 'god' | 'boon';
 
 const RadialMenu: React.FC<RadialMenuProps> = ({
   gods,
   boons,
+  weapons,
   onSelectBoon,
+  onSelectWeapon,
   selectedBoons,
+  selectedWeapon,
+  selectedAspect,
 }) => {
   const [menuState, setMenuState] = useState<MenuState>('main');
   const [selectedSlot, setSelectedSlot] = useState<BoonSlot | null>(null);
   const [selectedGod, setSelectedGod] = useState<God | null>(null);
+  const [selectedWeaponForAspect, setSelectedWeaponForAspect] = useState<Weapon | null>(null);
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [rotation, setRotation] = useState(0);
 
@@ -27,15 +36,16 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
 
   // Slot definitions for the main menu
   const slots: RadialMenuItem[] = [
-    { id: 'attack', name: 'Attack', icon: '⚡', angle: 0 },
-    { id: 'special', name: 'Special', icon: '✨', angle: 60 },
-    { id: 'cast', name: 'Cast', icon: '🔮', angle: 120 },
-    { id: 'sprint', name: 'Sprint', icon: '💨', angle: 180 },
-    { id: 'magick', name: 'Magick', icon: '💫', angle: 240 }
+    { id: 'weapon', name: 'Weapon', icon: '⚔️', angle: 0 },
+    { id: 'attack', name: 'Attack', icon: '⚡', angle: 60 },
+    { id: 'special', name: 'Special', icon: '✨', angle: 120 },
+    { id: 'cast', name: 'Cast', icon: '🔮', angle: 180 },
+    { id: 'sprint', name: 'Sprint', icon: '💨', angle: 240 },
+    { id: 'magick', name: 'Magick', icon: '💫', angle: 300 }
   ];
 
   const renderRadialItem = (
-    item: RadialMenuItem | God | Boon,
+    item: RadialMenuItem | God | Boon | Weapon | WeaponAspect,
     index: number,
     total: number,
     radius: number = 150
@@ -99,7 +109,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     );
   };
 
-  const handleItemClick = (item: RadialMenuItem | God | Boon) => {
+  const handleItemClick = (item: RadialMenuItem | God | Boon | Weapon | WeaponAspect) => {
     if (menuState === 'main') {
       // Handle slot selection
       const slotItem = item as RadialMenuItem;
@@ -112,6 +122,18 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
           setMenuState('god');
         }
       }
+    } else if (menuState === 'weapon') {
+      // Handle weapon selection
+      setSelectedWeaponForAspect(item as Weapon);
+      setMenuState('aspect');
+    } else if (menuState === 'aspect') {
+      // Handle aspect selection
+      const aspect = item as WeaponAspect;
+      if (selectedWeaponForAspect) {
+        onSelectWeapon(selectedWeaponForAspect, aspect);
+      }
+      setMenuState('main');
+      setSelectedWeaponForAspect(null);
     } else if (menuState === 'god') {
       // Handle god selection
       setSelectedGod(item as God);
@@ -141,9 +163,14 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     if (!selectedGod || selectedSlot === null) return [];
 
     return boons.filter(boon =>
-      boon.godId === selectedGod.godId &&
+      boon.god?.godId === selectedGod.godId &&
       boon.slot === selectedSlot
     );
+  };
+
+  const getFilteredAspects = (): WeaponAspect[] => {
+    if (!selectedWeaponForAspect) return [];
+    return selectedWeaponForAspect.aspects || [];
   };
 
   const renderCenterButton = () => {
@@ -158,6 +185,11 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
               } else if (menuState === 'god') {
                 setMenuState('main');
                 setSelectedSlot(null);
+              } else if (menuState === 'aspect') {
+                setMenuState('weapon');
+                setSelectedWeaponForAspect(null);
+              } else if (menuState === 'weapon') {
+                setMenuState('main');
               } else {
                 setMenuState('main');
               }
@@ -231,6 +263,10 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     switch (menuState) {
       case 'main':
         return slots;
+      case 'weapon':
+        return weapons;
+      case 'aspect':
+        return getFilteredAspects();
       case 'god':
         return gods;
       case 'boon':
@@ -259,7 +295,9 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
 
       {/* Menu state indicator */}
       <div className="absolute bottom-4 left-4 text-sm text-purple-300 bg-gray-900/50 px-3 py-1 rounded">
-        {menuState === 'main' && 'Select Slot'}
+        {menuState === 'main' && 'Select Category'}
+        {menuState === 'weapon' && 'Select Weapon'}
+        {menuState === 'aspect' && `Select ${selectedWeaponForAspect?.name} Aspect`}
         {menuState === 'god' && `Select God for ${selectedSlot !== null ? BoonSlot[selectedSlot] : ''}`}
         {menuState === 'boon' && `Select ${selectedGod?.name} Boon`}
       </div>
