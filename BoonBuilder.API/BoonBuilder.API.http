@@ -1,0 +1,6 @@
+@BoonBuilder.API_HostAddress = http://localhost:5291
+
+GET {{BoonBuilder.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

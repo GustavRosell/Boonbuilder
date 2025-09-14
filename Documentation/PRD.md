@@ -516,9 +516,3 @@ The boons within Hades II are divided in 3 types of boons:
   - **Description**: In each Encounter, an Aether Font appears in the area and restores all Magick when used.
   - **Element**: Air
   - **Icon link**: https://static.wikia.nocookie.net/hades_gamepedia_en/images/0/0a/Ionic_Gain_II.png/revision/latest?cb=20250804105102
-
-
-# Non-Standard Boons
-
-
-# NPC Boons
