@@ -357,11 +357,11 @@ GET /api/weapons
 GET /api/weapons/{id}
 ```
 
-### Pets
+### Familiars
 
-#### Get All Pets
+#### Get All Familiars
 ```http
-GET /api/pets
+GET /api/familiars
 ```
 
 **Response:**
@@ -370,38 +370,38 @@ GET /api/pets
   "success": true,
   "data": [
     {
-      "petId": 1,
+      "familiarId": 1,
       "name": "Frinos",
       "description": "A toad Familiar who helps Melinoë in battles and exploration",
-      "iconUrl": "/images/pets/frinos.png",
+      "iconUrl": "/images/familiars/frinos.png",
       "isHidden": false
     },
     {
-      "petId": 2,
+      "familiarId": 2,
       "name": "Gale",
       "description": "A Harpy Familiar who soars alongside Melinoë",
-      "iconUrl": "/images/pets/gale.png",
+      "iconUrl": "/images/familiars/gale.png",
       "isHidden": false
     },
     {
-      "petId": 3,
+      "familiarId": 3,
       "name": "Hecuba",
       "description": "A ghostly dog Familiar loyal to Melinoë",
-      "iconUrl": "/images/pets/hecuba.png",
+      "iconUrl": "/images/familiars/hecuba.png",
       "isHidden": false
     },
     {
-      "petId": 4,
+      "familiarId": 4,
       "name": "Raki",
       "description": "A spider Familiar that weaves webs for Melinoë",
-      "iconUrl": "/images/pets/raki.png",
+      "iconUrl": "/images/familiars/raki.png",
       "isHidden": false
     },
     {
-      "petId": 5,
+      "familiarId": 5,
       "name": "Toula",
       "description": "A bat Familiar that scouts ahead for Melinoë",
-      "iconUrl": "/images/pets/toula.png",
+      "iconUrl": "/images/familiars/toula.png",
       "isHidden": false
     }
   ]
@@ -409,27 +409,27 @@ GET /api/pets
 ```
 
 **Features:**
-- Returns all available pets for build selection
-- Hidden pets are filtered out in the API response
+- Returns all available familiars for build selection
+- Hidden familiars are filtered out in the API response
 - Includes authentic game descriptions and asset paths
 
-#### Get Pet by ID
+#### Get Familiar by ID
 ```http
-GET /api/pets/{id}
+GET /api/familiars/{id}
 ```
 
 **Parameters:**
-- `id` (integer): Pet ID
+- `id` (integer): Familiar ID
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "petId": 1,
+    "familiarId": 1,
     "name": "Frinos",
     "description": "A toad Familiar who helps Melinoë in battles and exploration",
-    "iconUrl": "/images/pets/frinos.png",
+    "iconUrl": "/images/familiars/frinos.png",
     "isHidden": false
   }
 }
@@ -678,10 +678,10 @@ enum ElementType {
 }
 ```
 
-### Pet Structure
+### Familiar Structure
 ```typescript
-interface Pet {
-  petId: number;
+interface Familiar {
+  familiarId: number;
   name: string;
   iconUrl: string;
   description: string;

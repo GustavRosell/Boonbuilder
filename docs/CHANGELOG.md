@@ -8,17 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Pet System**: Complete implementation with 5 selectable pets (Frinos, Gale, Hecuba, Raki, Toula)
-  - Backend Pet model with EF Core relationships and database integration
-  - Pet API endpoints (`GET /api/pets`, `GET /api/pets/{id}`)
-  - Pet selection integrated into RadialMenu navigation flow
-  - Pet slot added to loadout with proper ordering: Weapon → Pet → Attack → Special → Cast → Sprint → Magicka
+- **Familiar System**: Complete implementation with 5 selectable familiars (Frinos, Gale, Hecuba, Raki, Toula)
+  - Backend Familiar model with EF Core relationships and database integration
+  - Familiar API endpoints (`GET /api/familiars`, `GET /api/familiars/{id}`)
+  - Familiar selection integrated into RadialMenu navigation flow
+  - Familiar slot added to loadout with proper ordering: Weapon → Familiar → Attack → Special → Cast → Sprint → Magicka
 - **Expanded LoadoutPanel**: Redesigned with doubled width (320px → 640px) for comprehensive boon display
   - Two-column layout: Main Loadout (left) + Special Boons (right)
   - Enhanced Special Boons sections with better organization and visual hierarchy
   - Core Boons Summary showing all selected boons with god information
   - Game-authentic slot styling using provided template images
-- **Game Template Assets**: Added authentic Hades II slot and pet images for visual consistency
+- **DebugPanel**: Interactive testing component for boon prerequisite validation
+  - Core boon selection with visual feedback
+  - Duo and legendary boon availability testing
+  - Comprehensive debug information display
+- **Game Template Assets**: Added authentic Hades II slot and familiar images for visual consistency
 - Enhanced prerequisite system with visual feedback for locked boons
 - Grayscale effect and lock badges for unavailable duo/legendary boons
 - Prerequisite status chips in current loadout display
@@ -26,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - IMAGE_GUIDE.md for manual asset replacement workflow
 
 ### Changed
+- **Pet System → Familiar System**: Renamed throughout codebase for consistency with Hades II terminology
+  - Updated all backend models, controllers, and API endpoints
+  - Created proper EF Core migration for database schema changes
+  - Updated frontend components and type definitions
+  - Maintained backwards compatibility during transition
 - **LoadoutPanel Architecture**: Extracted into reusable components (LoadoutPanel, LoadoutSlot)
 - **Layout Organization**: Reorganized to Sidebar → Loadout (center) → RadialMenu (right)
 - **Build Details**: Improved with side-by-side name/save button layout
@@ -37,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Image Loading**: Fixed ImageWithFallback component to properly reset state when src prop changes
   - Resolves issue where boon images only appeared after page navigation
   - Images now load immediately when boons are selected/deselected
+- **Boon Type Filtering**: Fixed DebugPanel component to handle both string and numeric boon type formats
 - Critical bug in BoonBuilder.tsx where unfiltered API response was used instead of properly filtered available boons
 - Prerequisite display system now correctly shows locked vs available states
 
