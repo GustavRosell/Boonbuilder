@@ -22,7 +22,9 @@
       "Bash(curl:*)",
       "Bash(npm start)",
       "Bash(del \"C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder\\BoonBuilder.API\\boonbuilder.db\")",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(del \"BoonBuilder.API\\boonbuilder.db\")",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

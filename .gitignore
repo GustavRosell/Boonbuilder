@@ -109,3 +109,4 @@ logs/
 *.snupkg
 *.zip
 *.tar.gz
+.fake
