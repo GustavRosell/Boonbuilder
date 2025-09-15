@@ -21,7 +21,8 @@
       "Bash(dotnet run:*)",
       "Bash(curl:*)",
       "Bash(npm start)",
-      "Bash(del \"C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder\\BoonBuilder.API\\boonbuilder.db\")"
+      "Bash(del \"C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder\\BoonBuilder.API\\boonbuilder.db\")",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

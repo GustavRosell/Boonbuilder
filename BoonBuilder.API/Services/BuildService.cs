@@ -230,7 +230,7 @@ namespace BoonBuilder.Services
             // Validate boon slots (no duplicates)
             var slotCounts = buildBoons
                 .Where(bb => bb.Slot.HasValue)
-                .GroupBy(bb => bb.Slot.Value)
+                .GroupBy(bb => bb.Slot!.Value)
                 .Where(g => g.Count() > 1);
 
             if (slotCounts.Any())
