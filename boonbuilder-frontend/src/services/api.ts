@@ -3,7 +3,7 @@ import {
   God,
   Boon,
   Weapon,
-  Pet,
+  Familiar,
   Build,
   AuthResponse,
   LoginRequest,
@@ -131,15 +131,15 @@ export const weaponsApi = {
   },
 };
 
-// Pets API
-export const petsApi = {
-  getAll: async (): Promise<Pet[]> => {
-    const response = await api.get('/pets');
+// Familiars API
+export const familiarsApi = {
+  getAll: async (): Promise<Familiar[]> => {
+    const response = await api.get('/familiars');
     return response.data;
   },
 
-  getById: async (id: number): Promise<Pet> => {
-    const response = await api.get(`/pets/${id}`);
+  getById: async (id: number): Promise<Familiar> => {
+    const response = await api.get(`/familiars/${id}`);
     return response.data;
   },
 };

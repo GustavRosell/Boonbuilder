@@ -1,13 +1,13 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { BoonSlot, Boon, Weapon, WeaponAspect, Pet } from '../types';
+import { BoonSlot, Boon, Weapon, WeaponAspect, Familiar } from '../types';
 import ImageWithFallback from './ImageWithFallback';
 
 interface LoadoutSlotProps {
-  slotType: 'weapon' | 'pet' | 'boon';
+  slotType: 'weapon' | 'familiar' | 'boon';
   slotName?: string;
   boonSlot?: BoonSlot;
-  selectedItem?: Boon | Weapon | Pet;
+  selectedItem?: Boon | Weapon | Familiar;
   selectedAspect?: WeaponAspect; // Only for weapon slots
   onRemove?: () => void;
   emptyIcon: string; // Path to the empty slot template image

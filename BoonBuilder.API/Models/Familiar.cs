@@ -1,8 +1,8 @@
 namespace BoonBuilder.Models
 {
-    public class Pet
+    public class Familiar
     {
-        public int PetId { get; set; }
+        public int FamiliarId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string IconUrl { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;

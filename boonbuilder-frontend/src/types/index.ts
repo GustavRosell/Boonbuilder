@@ -147,8 +147,8 @@ export interface Weapon {
   aspects: WeaponAspect[];
 }
 
-export interface Pet {
-  petId: number;
+export interface Familiar {
+  familiarId: number;
   name: string;
   iconUrl: string;
   description: string;
@@ -225,10 +225,11 @@ export interface RadialMenuItem {
 export interface BuildState {
   weapon?: Weapon;
   aspect?: WeaponAspect;
-  pet?: Pet;
+  familiar?: Familiar;
   boons: Map<BoonSlot, Boon>;
   duoBoons: AvailableBoon[];
   legendaryBoons: AvailableBoon[];
+  nonCoreBoons: Boon[]; // For Infusion, Hex, Chaos boons
   name: string;
   description: string;
 }

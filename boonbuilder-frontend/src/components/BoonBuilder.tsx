@@ -2,19 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn } from 'lucide-react';
 import RadialMenu from './RadialMenu';
 import LoadoutPanel from './LoadoutPanel';
-import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Pet, AvailableBoon } from '../types';
-import { godsApi, boonsApi, weaponsApi, petsApi } from '../services/api';
+import DebugPanel from './DebugPanel';
+import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Familiar, AvailableBoon } from '../types';
+import { godsApi, boonsApi, weaponsApi, familiarsApi } from '../services/api';
 import { extractSelectedBoonIds, filterAvailableBoons } from '../utils/boonPrerequisites';
 
-type PageType = 'home' | 'browse' | 'creator' | 'community' | 'favorites';
+type PageType = 'home' | 'browse' | 'creator' | 'community' | 'favorites' | 'debug';
 
 const BoonBuilder: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedBuild, setSelectedBuild] = useState<BuildState>({
     boons: new Map(),
     duoBoons: [],
     legendaryBoons: [],
+    nonCoreBoons: [],
     name: '',
     description: ''
   });
@@ -23,7 +25,7 @@ const BoonBuilder: React.FC = () => {
   const [gods, setGods] = useState<God[]>([]);
   const [boons, setBoons] = useState<Boon[]>([]);
   const [weapons, setWeapons] = useState<Weapon[]>([]);
-  const [pets, setPets] = useState<Pet[]>([]);
+  const [familiars, setFamiliars] = useState<Familiar[]>([]);
   const [availableDuoBoons, setAvailableDuoBoons] = useState<AvailableBoon[]>([]);
   const [availableLegendaryBoons, setAvailableLegendaryBoons] = useState<AvailableBoon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,17 +36,17 @@ const BoonBuilder: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [godsData, boonsData, weaponsData, petsData] = await Promise.all([
+        const [godsData, boonsData, weaponsData, familiarsData] = await Promise.all([
           godsApi.getAll(),
           boonsApi.getAll(),
           weaponsApi.getAll(),
-          petsApi.getAll()
+          familiarsApi.getAll()
         ]);
 
         setGods(godsData);
         setBoons(boonsData);
         setWeapons(weaponsData);
-        setPets(petsData);
+        setFamiliars(familiarsData);
       } catch (err) {
         setError('Failed to load data. Please check if the API server is running.');
         console.error('Error loading data:', err);
@@ -76,12 +78,12 @@ const BoonBuilder: React.FC = () => {
     setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined });
   };
 
-  const handleSelectPet = (pet: Pet) => {
-    setSelectedBuild({ ...selectedBuild, pet });
+  const handleSelectFamiliar = (familiar: Familiar) => {
+    setSelectedBuild({ ...selectedBuild, familiar });
   };
 
-  const handleRemovePet = () => {
-    setSelectedBuild({ ...selectedBuild, pet: undefined });
+  const handleRemoveFamiliar = () => {
+    setSelectedBuild({ ...selectedBuild, familiar: undefined });
   };
 
   const handleSelectDuoBoon = (boon: AvailableBoon) => {
@@ -102,6 +104,16 @@ const BoonBuilder: React.FC = () => {
   const handleRemoveLegendaryBoon = (boonId: number) => {
     const newLegendaryBoons = selectedBuild.legendaryBoons.filter(boon => boon.boonId !== boonId);
     setSelectedBuild({ ...selectedBuild, legendaryBoons: newLegendaryBoons });
+  };
+
+  const handleSelectNonCoreBoon = (boon: Boon) => {
+    const newNonCoreBoons = [...selectedBuild.nonCoreBoons, boon];
+    setSelectedBuild({ ...selectedBuild, nonCoreBoons: newNonCoreBoons });
+  };
+
+  const handleRemoveNonCoreBoon = (boonId: number) => {
+    const newNonCoreBoons = selectedBuild.nonCoreBoons.filter(boon => boon.boonId !== boonId);
+    setSelectedBuild({ ...selectedBuild, nonCoreBoons: newNonCoreBoons });
   };
 
   // Update available boons when selections change
@@ -197,7 +209,8 @@ const BoonBuilder: React.FC = () => {
             { id: 'browse' as PageType, label: 'Browse', icon: BookOpen },
             { id: 'creator' as PageType, label: 'Creator', icon: Hammer },
             { id: 'community' as PageType, label: 'Community', icon: Users },
-            { id: 'favorites' as PageType, label: 'Favorites', icon: Heart }
+            { id: 'favorites' as PageType, label: 'Favorites', icon: Heart },
+            { id: 'debug' as PageType, label: 'Debug', icon: ChevronRight }
           ].map(item => (
             <button
               key={item.id}
@@ -233,7 +246,8 @@ const BoonBuilder: React.FC = () => {
             {currentPage === 'creator' ? 'Build Creator' :
              currentPage === 'browse' ? 'Browse Builds' :
              currentPage === 'community' ? 'Community Builds' :
-             currentPage === 'favorites' ? 'Favorite Builds' : 'Welcome to BoonBuilder'}
+             currentPage === 'favorites' ? 'Favorite Builds' :
+             currentPage === 'debug' ? 'Debug Panel' : 'Welcome to BoonBuilder'}
           </h2>
         </header>
 
@@ -245,9 +259,10 @@ const BoonBuilder: React.FC = () => {
                 selectedBuild={selectedBuild}
                 onRemoveBoon={handleRemoveBoon}
                 onRemoveWeapon={handleRemoveWeapon}
-                onRemovePet={handleRemovePet}
+                onRemoveFamiliar={handleRemoveFamiliar}
                 onRemoveDuoBoon={handleRemoveDuoBoon}
                 onRemoveLegendaryBoon={handleRemoveLegendaryBoon}
+                onRemoveNonCoreBoon={handleRemoveNonCoreBoon}
                 onBuildNameChange={(name) => setSelectedBuild({ ...selectedBuild, name })}
                 onBuildDescriptionChange={(description) => setSelectedBuild({ ...selectedBuild, description })}
               />
@@ -258,23 +273,25 @@ const BoonBuilder: React.FC = () => {
                   gods={gods}
                   boons={boons}
                   weapons={weapons}
-                  pets={pets}
+                  familiars={familiars}
                   availableDuoBoons={availableDuoBoons}
                   availableLegendaryBoons={availableLegendaryBoons}
                   onSelectBoon={handleSelectBoon}
                   onSelectDuoBoon={handleSelectDuoBoon}
                   onSelectLegendaryBoon={handleSelectLegendaryBoon}
                   onSelectWeapon={handleSelectWeapon}
-                  onSelectPet={handleSelectPet}
+                  onSelectFamiliar={handleSelectFamiliar}
                   selectedBoons={selectedBuild.boons}
                   selectedDuoBoons={selectedBuild.duoBoons}
                   selectedLegendaryBoons={selectedBuild.legendaryBoons}
                   selectedWeapon={selectedBuild.weapon}
                   selectedAspect={selectedBuild.aspect}
-                  selectedPet={selectedBuild.pet}
+                  selectedFamiliar={selectedBuild.familiar}
                 />
               </div>
             </div>
+          ) : currentPage === 'debug' ? (
+            <DebugPanel />
           ) : currentPage === 'home' ? (
             <div className="max-w-4xl mx-auto">
               <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-2xl p-8 border border-purple-500/30">

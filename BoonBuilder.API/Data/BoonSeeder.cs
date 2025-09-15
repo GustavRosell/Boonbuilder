@@ -22,9 +22,9 @@ namespace BoonBuilder.Data
             await context.Weapons.AddRangeAsync(weapons);
             await context.SaveChangesAsync();
 
-            // Seed Pets
-            var pets = GetPets();
-            await context.Pets.AddRangeAsync(pets);
+            // Seed Familiars
+            var familiars = GetFamiliars();
+            await context.Familiars.AddRangeAsync(familiars);
             await context.SaveChangesAsync();
 
             // Seed ALL Core Boons
@@ -67,15 +67,15 @@ namespace BoonBuilder.Data
             };
         }
 
-        private static List<Pet> GetPets()
+        private static List<Familiar> GetFamiliars()
         {
-            return new List<Pet>
+            return new List<Familiar>
             {
-                new Pet { PetId = 1, Name = "Frinos", IconUrl = "/images/pets/frinos.png", Description = "A toad Familiar who helps Melinoë in battles and exploration", IsHidden = false },
-                new Pet { PetId = 2, Name = "Gale", IconUrl = "/images/pets/gale.png", Description = "A Harpy Familiar who soars alongside Melinoë", IsHidden = false },
-                new Pet { PetId = 3, Name = "Hecuba", IconUrl = "/images/pets/hecuba.png", Description = "A ghostly dog Familiar loyal to Melinoë", IsHidden = false },
-                new Pet { PetId = 4, Name = "Raki", IconUrl = "/images/pets/raki.png", Description = "A spider Familiar that weaves webs for Melinoë", IsHidden = false },
-                new Pet { PetId = 5, Name = "Toula", IconUrl = "/images/pets/toula.png", Description = "A bat Familiar that scouts ahead for Melinoë", IsHidden = false }
+                new Familiar { FamiliarId = 1, Name = "Frinos", IconUrl = "/images/familiars/frinos.png", Description = "A toad Familiar who helps Melinoë in battles and exploration", IsHidden = false },
+                new Familiar { FamiliarId = 2, Name = "Gale", IconUrl = "/images/familiars/gale.png", Description = "A Harpy Familiar who soars alongside Melinoë", IsHidden = false },
+                new Familiar { FamiliarId = 3, Name = "Hecuba", IconUrl = "/images/familiars/hecuba.png", Description = "A ghostly dog Familiar loyal to Melinoë", IsHidden = false },
+                new Familiar { FamiliarId = 4, Name = "Raki", IconUrl = "/images/familiars/raki.png", Description = "A spider Familiar that weaves webs for Melinoë", IsHidden = false },
+                new Familiar { FamiliarId = 5, Name = "Toula", IconUrl = "/images/familiars/toula.png", Description = "A bat Familiar that scouts ahead for Melinoë", IsHidden = false }
             };
         }
 

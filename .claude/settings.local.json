@@ -24,7 +24,10 @@
       "Bash(del \"C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder\\BoonBuilder.API\\boonbuilder.db\")",
       "Bash(git rm:*)",
       "Bash(del \"BoonBuilder.API\\boonbuilder.db\")",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(dir:*)",
+      "Bash(copy Pet.cs Familiar.cs)",
+      "Bash(dotnet ef database:*)"
     ],
     "deny": [],
     "ask": []

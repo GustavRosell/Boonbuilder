@@ -7,9 +7,10 @@ interface LoadoutPanelProps {
   selectedBuild: BuildState;
   onRemoveBoon: (slot: BoonSlot) => void;
   onRemoveWeapon: () => void;
-  onRemovePet: () => void;
+  onRemoveFamiliar: () => void;
   onRemoveDuoBoon: (boonId: number) => void;
   onRemoveLegendaryBoon: (boonId: number) => void;
+  onRemoveNonCoreBoon: (boonId: number) => void;
   onBuildNameChange: (name: string) => void;
   onBuildDescriptionChange: (description: string) => void;
 }
@@ -18,13 +19,14 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
   selectedBuild,
   onRemoveBoon,
   onRemoveWeapon,
-  onRemovePet,
+  onRemoveFamiliar,
   onRemoveDuoBoon,
   onRemoveLegendaryBoon,
+  onRemoveNonCoreBoon,
   onBuildNameChange,
   onBuildDescriptionChange
 }) => {
-  // Ordered slots as specified: Weapon → Pet → Attack → Special → Cast → Sprint → Magicka
+  // Ordered slots as specified: Weapon → Familiar → Attack → Special → Cast → Sprint → Magicka
   const orderedSlots = [
     {
       slotType: 'weapon' as const,
@@ -32,16 +34,16 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
       selectedItem: selectedBuild.weapon,
       selectedAspect: selectedBuild.aspect,
       onRemove: selectedBuild.weapon ? onRemoveWeapon : undefined,
-      emptyIcon: '/images/slots/weapon.png', // We may need to create this
+      emptyIcon: '/images/slots/weapon.png',
       emptyLabel: 'No Weapon'
     },
     {
-      slotType: 'pet' as const,
-      slotName: 'Pet',
-      selectedItem: selectedBuild.pet,
-      onRemove: selectedBuild.pet ? onRemovePet : undefined,
-      emptyIcon: '/images/slots/pet.png',
-      emptyLabel: 'No Pet'
+      slotType: 'familiar' as const,
+      slotName: 'Familiar',
+      selectedItem: selectedBuild.familiar,
+      onRemove: selectedBuild.familiar ? onRemoveFamiliar : undefined,
+      emptyIcon: '/images/slots/familiar.png',
+      emptyLabel: 'No Familiar'
     },
     {
       slotType: 'boon' as const,
@@ -92,7 +94,7 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
 
   return (
     <div className="w-[640px] bg-gray-900/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 h-full flex flex-col">
-      <h2 className="text-2xl font-bold text-purple-300 mb-6 text-center">Current Loadout</h2>
+      <h2 className="text-2xl font-bold text-purple-300 mb-6 text-center">Loadout</h2>
 
       <div className="flex gap-6 flex-1 overflow-hidden">
         {/* Left Column - Main Loadout Slots */}
@@ -214,32 +216,41 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
               )}
             </div>
 
-            {/* All Core Boons Summary Section */}
+            {/* Non-Core Boons Section */}
             <div className="bg-gray-800/30 rounded-lg p-4">
-              <h4 className="text-base font-semibold text-purple-300 mb-3 flex items-center">
-                <span className="text-lg mr-2">✨</span>
-                Core Boons Summary
+              <h4 className="text-base font-semibold text-cyan-300 mb-3 flex items-center">
+                <span className="text-lg mr-2">🌟</span>
+                Non-Core Boons
               </h4>
-              <div className="grid grid-cols-1 gap-2">
-                {Array.from(selectedBuild.boons.entries()).map(([slot, boon]) => (
-                  <div key={slot} className="flex items-center space-x-2 p-2 bg-purple-900/20 rounded border border-purple-500/30">
-                    <div className="w-8 h-8 rounded bg-gradient-to-br from-purple-600/40 to-blue-600/40 border border-purple-400/60 flex items-center justify-center flex-shrink-0">
-                      <img
-                        src={boon.iconUrl}
-                        alt={boon.name}
-                        className="w-6 h-6 rounded object-cover"
-                      />
+              {selectedBuild.nonCoreBoons.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {selectedBuild.nonCoreBoons.map((boon) => (
+                    <div key={boon.boonId} className="relative group">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-600/40 to-blue-600/40 border-2 border-cyan-400/60 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
+                        <img
+                          src={boon.iconUrl}
+                          alt={boon.name}
+                          className="w-8 h-8 rounded object-cover"
+                        />
+                        <button
+                          onClick={() => onRemoveNonCoreBoon(boon.boonId)}
+                          className="absolute -top-1 -right-1 text-red-400 hover:text-red-300 transition-colors p-1 rounded-full bg-gray-900 opacity-0 group-hover:opacity-100"
+                          title="Remove Non-Core Boon"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        {boon.name}
+                        <div className="text-cyan-300">{boon.god?.name}</div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-white text-xs font-medium truncate">{boon.name}</div>
-                      <div className="text-xs text-purple-300">{boon.god?.name}</div>
-                    </div>
-                  </div>
-                ))}
-                {selectedBuild.boons.size === 0 && (
-                  <p className="text-gray-400 text-sm">No core boons selected</p>
-                )}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 text-sm">No non-core boons selected (Infusion, Hex, Chaos)</p>
+              )}
             </div>
 
           </div>
