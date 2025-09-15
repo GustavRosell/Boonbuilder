@@ -81,6 +81,54 @@ export interface DuoBoon extends Boon {
   secondGod: God;
 }
 
+export interface BoonPrerequisite {
+  prerequisiteId: number;
+  boonId: number;
+  requiredBoonId: number;
+  isAlternative: boolean;
+  alternativeGroupId: number;
+  requiredBoon?: Boon;
+}
+
+export interface PrerequisiteGroup {
+  groupId: number;
+  isAlternativeGroup: boolean;
+  description: string;
+  requiredBoons: Array<{
+    boonId: number;
+    name: string;
+    iconUrl: string;
+    slot?: BoonSlot;
+    god?: God;
+  }>;
+}
+
+export interface BoonPrerequisiteDetails {
+  boonId: number;
+  boonName: string;
+  boonType: string;
+  prerequisiteGroups: PrerequisiteGroup[];
+  hasPrerequisites: boolean;
+}
+
+export interface AvailableBoon {
+  boonId: number;
+  name: string;
+  iconUrl: string;
+  description: string;
+  effect: string;
+  type: 'Duo' | 'Legendary';
+  isAvailable: boolean;
+  god?: God;
+  firstGod?: God;
+  secondGod?: God;
+}
+
+export interface AvailableBoonsResponse {
+  duoBoons: AvailableBoon[];
+  legendaryBoons: AvailableBoon[];
+}
+
 export interface WeaponAspect {
   aspectId: number;
   weaponId: number;
@@ -170,6 +218,8 @@ export interface BuildState {
   weapon?: Weapon;
   aspect?: WeaponAspect;
   boons: Map<BoonSlot, Boon>;
+  duoBoons: AvailableBoon[];
+  legendaryBoons: AvailableBoon[];
   name: string;
   description: string;
 }

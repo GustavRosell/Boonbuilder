@@ -117,50 +117,185 @@ namespace BoonBuilder.Controllers
             return Ok(duoBoons);
         }
 
+        // GET: api/boons/legendary
+        [HttpGet("legendary")]
+        public async Task<ActionResult<IEnumerable<object>>> GetLegendaryBoons()
+        {
+            var legendaryBoons = await _context.Boons
+                .Where(b => b.Type == BoonType.Legendary)
+                .Include(b => b.God)
+                .Include(b => b.Prerequisites)
+                    .ThenInclude(p => p.RequiredBoon)
+                .Select(b => new
+                {
+                    b.BoonId,
+                    b.Name,
+                    b.Description,
+                    b.Effect,
+                    b.IconUrl,
+                    b.Element,
+                    God = b.God != null ? new
+                    {
+                        b.God.GodId,
+                        b.God.Name,
+                        b.God.IconUrl
+                    } : null,
+                    Prerequisites = b.Prerequisites.Select(p => new
+                    {
+                        p.RequiredBoonId,
+                        RequiredBoonName = p.RequiredBoon.Name,
+                        p.IsAlternative,
+                        p.AlternativeGroupId
+                    })
+                })
+                .ToListAsync();
+
+            return Ok(legendaryBoons);
+        }
+
         // GET: api/boons/available
         [HttpPost("available")]
-        public async Task<ActionResult<IEnumerable<object>>> GetAvailableBoons([FromBody] List<int> selectedBoonIds)
+        public async Task<ActionResult<object>> GetAvailableBoons([FromBody] List<int> selectedBoonIds)
         {
-            // Get all duo boons
+            var availableBoons = new
+            {
+                DuoBoons = await GetAvailableDuoBoons(selectedBoonIds),
+                LegendaryBoons = await GetAvailableLegendaryBoons(selectedBoonIds)
+            };
+
+            return Ok(availableBoons);
+        }
+
+        private async Task<List<object>> GetAvailableDuoBoons(List<int> selectedBoonIds)
+        {
             var duoBoons = await _context.DuoBoons
                 .Include(d => d.Prerequisites)
+                .Include(d => d.FirstGod)
+                .Include(d => d.SecondGod)
                 .ToListAsync();
 
             var availableDuoBoons = new List<object>();
 
             foreach (var duoBoon in duoBoons)
             {
-                // Group prerequisites by AlternativeGroupId
-                var prerequisiteGroups = duoBoon.Prerequisites
-                    .GroupBy(p => p.AlternativeGroupId)
-                    .ToList();
+                var isAvailable = CheckBoonPrerequisites(duoBoon.Prerequisites, selectedBoonIds);
 
-                // Check if all groups are satisfied
-                bool allGroupsSatisfied = true;
-                foreach (var group in prerequisiteGroups)
+                availableDuoBoons.Add(new
                 {
-                    // At least one boon from each group must be selected
-                    bool groupSatisfied = group.Any(p => selectedBoonIds.Contains(p.RequiredBoonId));
-                    if (!groupSatisfied)
-                    {
-                        allGroupsSatisfied = false;
-                        break;
-                    }
-                }
+                    duoBoon.BoonId,
+                    duoBoon.Name,
+                    duoBoon.IconUrl,
+                    duoBoon.Description,
+                    duoBoon.Effect,
+                    Type = "Duo",
+                    FirstGod = new { duoBoon.FirstGod.GodId, duoBoon.FirstGod.Name, duoBoon.FirstGod.IconUrl },
+                    SecondGod = new { duoBoon.SecondGod.GodId, duoBoon.SecondGod.Name, duoBoon.SecondGod.IconUrl },
+                    IsAvailable = isAvailable
+                });
+            }
 
-                if (allGroupsSatisfied && prerequisiteGroups.Any())
+            return availableDuoBoons;
+        }
+
+        private async Task<List<object>> GetAvailableLegendaryBoons(List<int> selectedBoonIds)
+        {
+            var legendaryBoons = await _context.Boons
+                .Where(b => b.Type == BoonType.Legendary)
+                .Include(b => b.Prerequisites)
+                .Include(b => b.God)
+                .ToListAsync();
+
+            var availableLegendaryBoons = new List<object>();
+
+            foreach (var legendaryBoon in legendaryBoons)
+            {
+                var isAvailable = CheckBoonPrerequisites(legendaryBoon.Prerequisites, selectedBoonIds);
+
+                availableLegendaryBoons.Add(new
                 {
-                    availableDuoBoons.Add(new
-                    {
-                        duoBoon.BoonId,
-                        duoBoon.Name,
-                        duoBoon.IconUrl,
-                        IsAvailable = true
-                    });
+                    legendaryBoon.BoonId,
+                    legendaryBoon.Name,
+                    legendaryBoon.IconUrl,
+                    legendaryBoon.Description,
+                    legendaryBoon.Effect,
+                    Type = "Legendary",
+                    God = legendaryBoon.God != null ? new { legendaryBoon.God.GodId, legendaryBoon.God.Name, legendaryBoon.God.IconUrl } : null,
+                    IsAvailable = isAvailable
+                });
+            }
+
+            return availableLegendaryBoons;
+        }
+
+        private bool CheckBoonPrerequisites(ICollection<BoonPrerequisite> prerequisites, List<int> selectedBoonIds)
+        {
+            if (!prerequisites.Any()) return false;
+
+            // Group prerequisites by AlternativeGroupId
+            var prerequisiteGroups = prerequisites
+                .GroupBy(p => p.AlternativeGroupId)
+                .ToList();
+
+            // Check if all groups are satisfied
+            foreach (var group in prerequisiteGroups)
+            {
+                // At least one boon from each group must be selected
+                bool groupSatisfied = group.Any(p => selectedBoonIds.Contains(p.RequiredBoonId));
+                if (!groupSatisfied)
+                {
+                    return false;
                 }
             }
 
-            return Ok(availableDuoBoons);
+            return true;
+        }
+
+        // GET: api/boons/prerequisites/{boonId}
+        [HttpGet("prerequisites/{boonId}")]
+        public async Task<ActionResult<object>> GetBoonPrerequisites(int boonId)
+        {
+            var boon = await _context.Boons
+                .Include(b => b.Prerequisites)
+                    .ThenInclude(p => p.RequiredBoon)
+                        .ThenInclude(rb => rb.God)
+                .FirstOrDefaultAsync(b => b.BoonId == boonId);
+
+            if (boon == null)
+            {
+                return NotFound($"Boon with ID {boonId} not found");
+            }
+
+            var prerequisiteGroups = boon.Prerequisites
+                .GroupBy(p => p.AlternativeGroupId)
+                .Select(group => new
+                {
+                    GroupId = group.Key,
+                    IsAlternativeGroup = group.First().IsAlternative,
+                    Description = group.First().IsAlternative ? "Any one of these boons" : "All of these boons",
+                    RequiredBoons = group.Select(p => new
+                    {
+                        p.RequiredBoon.BoonId,
+                        p.RequiredBoon.Name,
+                        p.RequiredBoon.IconUrl,
+                        p.RequiredBoon.Slot,
+                        God = p.RequiredBoon.God != null ? new
+                        {
+                            p.RequiredBoon.God.GodId,
+                            p.RequiredBoon.God.Name,
+                            p.RequiredBoon.God.IconUrl
+                        } : null
+                    })
+                })
+                .ToList();
+
+            return Ok(new
+            {
+                BoonId = boon.BoonId,
+                BoonName = boon.Name,
+                BoonType = boon.Type.ToString(),
+                PrerequisiteGroups = prerequisiteGroups,
+                HasPrerequisites = prerequisiteGroups.Any()
+            });
         }
     }
 }

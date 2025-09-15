@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn, X } from 'lucide-react';
 import RadialMenu from './RadialMenu';
-import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect } from '../types';
+import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, AvailableBoon, AvailableBoonsResponse } from '../types';
 import { godsApi, boonsApi, weaponsApi } from '../services/api';
+import { extractSelectedBoonIds, filterAvailableBoons, calculateBuildCompletion, validateBuild } from '../utils/boonPrerequisites';
 
 type PageType = 'home' | 'browse' | 'creator' | 'community' | 'favorites';
 
@@ -11,6 +12,8 @@ const BoonBuilder: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedBuild, setSelectedBuild] = useState<BuildState>({
     boons: new Map(),
+    duoBoons: [],
+    legendaryBoons: [],
     name: '',
     description: ''
   });
@@ -19,6 +22,8 @@ const BoonBuilder: React.FC = () => {
   const [gods, setGods] = useState<God[]>([]);
   const [boons, setBoons] = useState<Boon[]>([]);
   const [weapons, setWeapons] = useState<Weapon[]>([]);
+  const [availableDuoBoons, setAvailableDuoBoons] = useState<AvailableBoon[]>([]);
+  const [availableLegendaryBoons, setAvailableLegendaryBoons] = useState<AvailableBoon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +71,46 @@ const BoonBuilder: React.FC = () => {
   const handleRemoveWeapon = () => {
     setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined });
   };
+
+  const handleSelectDuoBoon = (boon: AvailableBoon) => {
+    const newDuoBoons = [...selectedBuild.duoBoons, boon];
+    setSelectedBuild({ ...selectedBuild, duoBoons: newDuoBoons });
+  };
+
+  const handleSelectLegendaryBoon = (boon: AvailableBoon) => {
+    const newLegendaryBoons = [...selectedBuild.legendaryBoons, boon];
+    setSelectedBuild({ ...selectedBuild, legendaryBoons: newLegendaryBoons });
+  };
+
+  const handleRemoveDuoBoon = (boonId: number) => {
+    const newDuoBoons = selectedBuild.duoBoons.filter(boon => boon.boonId !== boonId);
+    setSelectedBuild({ ...selectedBuild, duoBoons: newDuoBoons });
+  };
+
+  const handleRemoveLegendaryBoon = (boonId: number) => {
+    const newLegendaryBoons = selectedBuild.legendaryBoons.filter(boon => boon.boonId !== boonId);
+    setSelectedBuild({ ...selectedBuild, legendaryBoons: newLegendaryBoons });
+  };
+
+  // Update available boons when selections change
+  useEffect(() => {
+    const updateAvailableBoons = async () => {
+      try {
+        const selectedBoonIds = extractSelectedBoonIds(selectedBuild.boons);
+        const availableBoonsResponse = await boonsApi.getAvailable(selectedBoonIds);
+        const { availableDuo, availableLegendary } = filterAvailableBoons(availableBoonsResponse);
+
+        setAvailableDuoBoons(availableBoonsResponse.duoBoons);
+        setAvailableLegendaryBoons(availableBoonsResponse.legendaryBoons);
+      } catch (err) {
+        console.error('Error loading available boons:', err);
+      }
+    };
+
+    if (selectedBuild.boons.size > 0) {
+      updateAvailableBoons();
+    }
+  }, [selectedBuild.boons]);
 
   const renderLoadout = () => {
     const slots = [
@@ -146,6 +191,68 @@ const BoonBuilder: React.FC = () => {
               </div>
             );
           })}
+
+          {/* Duo Boons Section */}
+          {selectedBuild.duoBoons.length > 0 && (
+            <>
+              <div className="mt-4 pt-4 border-t border-gray-600">
+                <h4 className="text-sm font-semibold text-yellow-300 mb-2">Duo Boons</h4>
+                {selectedBuild.duoBoons.map((duoBoon) => (
+                  <div key={duoBoon.boonId} className="flex items-center space-x-3 p-2 bg-yellow-900/20 rounded-lg mb-2">
+                    <div className="w-10 h-10 rounded-full bg-yellow-600 flex items-center justify-center">
+                      <img
+                        src={duoBoon.iconUrl}
+                        alt={duoBoon.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium text-sm">{duoBoon.name}</div>
+                      <div className="text-xs text-yellow-300">
+                        {duoBoon.firstGod?.name} + {duoBoon.secondGod?.name}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveDuoBoon(duoBoon.boonId)}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Legendary Boons Section */}
+          {selectedBuild.legendaryBoons.length > 0 && (
+            <>
+              <div className="mt-4 pt-4 border-t border-gray-600">
+                <h4 className="text-sm font-semibold text-orange-300 mb-2">Legendary Boons</h4>
+                {selectedBuild.legendaryBoons.map((legendaryBoon) => (
+                  <div key={legendaryBoon.boonId} className="flex items-center space-x-3 p-2 bg-orange-900/20 rounded-lg mb-2">
+                    <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center">
+                      <img
+                        src={legendaryBoon.iconUrl}
+                        alt={legendaryBoon.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-white font-medium text-sm">{legendaryBoon.name}</div>
+                      <div className="text-xs text-orange-300">{legendaryBoon.god?.name}</div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveLegendaryBoon(legendaryBoon.boonId)}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-700">
@@ -288,9 +395,15 @@ const BoonBuilder: React.FC = () => {
                   gods={gods}
                   boons={boons}
                   weapons={weapons}
+                  availableDuoBoons={availableDuoBoons}
+                  availableLegendaryBoons={availableLegendaryBoons}
                   onSelectBoon={handleSelectBoon}
+                  onSelectDuoBoon={handleSelectDuoBoon}
+                  onSelectLegendaryBoon={handleSelectLegendaryBoon}
                   onSelectWeapon={handleSelectWeapon}
                   selectedBoons={selectedBuild.boons}
+                  selectedDuoBoons={selectedBuild.duoBoons}
+                  selectedLegendaryBoons={selectedBuild.legendaryBoons}
                   selectedWeapon={selectedBuild.weapon}
                   selectedAspect={selectedBuild.aspect}
                 />

@@ -15,7 +15,9 @@
       "Bash(node_modules.bintailwindcss init -p)",
       "Bash(npm run build:*)",
       "Bash(npm uninstall:*)",
-      "Bash(del boonbuilder.db)"
+      "Bash(del boonbuilder.db)",
+      "Bash(rm:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

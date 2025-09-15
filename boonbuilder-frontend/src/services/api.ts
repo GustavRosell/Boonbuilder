@@ -8,7 +8,9 @@ import {
   LoginRequest,
   RegisterRequest,
   BuildTier,
-  BoonType
+  BoonType,
+  AvailableBoonsResponse,
+  BoonPrerequisiteDetails
 } from '../types';
 
 // Configure axios with base URL
@@ -101,6 +103,16 @@ export const boonsApi = {
 
   getBySlot: async (slot: string): Promise<Boon[]> => {
     const response = await api.get(`/boons/slot/${slot}`);
+    return response.data;
+  },
+
+  getAvailable: async (selectedBoonIds: number[]): Promise<AvailableBoonsResponse> => {
+    const response = await api.post('/boons/available', selectedBoonIds);
+    return response.data;
+  },
+
+  getPrerequisites: async (boonId: number): Promise<BoonPrerequisiteDetails> => {
+    const response = await api.get(`/boons/prerequisites/${boonId}`);
     return response.data;
   },
 };
