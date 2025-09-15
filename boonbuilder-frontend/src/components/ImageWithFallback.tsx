@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface ImageWithFallbackProps {
   src: string;
@@ -16,6 +16,13 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [currentSrc, setCurrentSrc] = useState(src);
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Reset state when src prop changes
+  useEffect(() => {
+    setCurrentSrc(src);
+    setImageError(false);
+    setIsLoading(true);
+  }, [src]);
 
   const handleImageError = () => {
     // Try fallback from .webp to .svg if available
