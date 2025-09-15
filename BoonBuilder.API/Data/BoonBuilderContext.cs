@@ -12,6 +12,7 @@ namespace BoonBuilder.Data
         public DbSet<God> Gods { get; set; }
         public DbSet<Weapon> Weapons { get; set; }
         public DbSet<WeaponAspect> WeaponAspects { get; set; }
+        public DbSet<Pet> Pets { get; set; }
         public DbSet<Boon> Boons { get; set; }
         public DbSet<DuoBoon> DuoBoons { get; set; }
         public DbSet<BoonRarityValue> BoonRarityValues { get; set; }
@@ -82,6 +83,12 @@ namespace BoonBuilder.Data
                 .HasForeignKey(b => b.WeaponAspectId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Build>()
+                .HasOne(b => b.Pet)
+                .WithMany(p => p.Builds)
+                .HasForeignKey(b => b.PetId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // Configure UserFavorite relationships
             modelBuilder.Entity<UserFavorite>()
                 .HasOne(uf => uf.User)
@@ -129,6 +136,13 @@ namespace BoonBuilder.Data
             });
 
             modelBuilder.Entity<WeaponAspect>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(100);
+                entity.Property(e => e.IconUrl).HasMaxLength(500);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+            });
+
+            modelBuilder.Entity<Pet>(entity =>
             {
                 entity.Property(e => e.Name).HasMaxLength(100);
                 entity.Property(e => e.IconUrl).HasMaxLength(500);

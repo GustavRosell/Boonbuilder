@@ -22,6 +22,11 @@ namespace BoonBuilder.Data
             await context.Weapons.AddRangeAsync(weapons);
             await context.SaveChangesAsync();
 
+            // Seed Pets
+            var pets = GetPets();
+            await context.Pets.AddRangeAsync(pets);
+            await context.SaveChangesAsync();
+
             // Seed ALL Core Boons
             var coreBoons = GetAllCoreBoons();
             await context.Boons.AddRangeAsync(coreBoons);
@@ -59,6 +64,18 @@ namespace BoonBuilder.Data
                 new God { GodId = 7, Name = "Hestia", IconUrl = "/images/gods/hestia.webp", PrimaryElement = ElementType.Fire, StatusEffect = "Scorch", Description = "Goddess of the Hearth" },
                 new God { GodId = 8, Name = "Poseidon", IconUrl = "/images/gods/poseidon.webp", PrimaryElement = ElementType.Water, SecondaryElement = ElementType.Aether, StatusEffect = "Slip", Description = "God of the Sea" },
                 new God { GodId = 9, Name = "Zeus", IconUrl = "/images/gods/zeus.webp", PrimaryElement = ElementType.Air, SecondaryElement = ElementType.Aether, StatusEffect = "Blitz", Description = "King of Olympus" }
+            };
+        }
+
+        private static List<Pet> GetPets()
+        {
+            return new List<Pet>
+            {
+                new Pet { PetId = 1, Name = "Frinos", IconUrl = "/images/pets/frinos.png", Description = "A toad Familiar who helps Melinoë in battles and exploration", IsHidden = false },
+                new Pet { PetId = 2, Name = "Gale", IconUrl = "/images/pets/gale.png", Description = "A Harpy Familiar who soars alongside Melinoë", IsHidden = false },
+                new Pet { PetId = 3, Name = "Hecuba", IconUrl = "/images/pets/hecuba.png", Description = "A ghostly dog Familiar loyal to Melinoë", IsHidden = false },
+                new Pet { PetId = 4, Name = "Raki", IconUrl = "/images/pets/raki.png", Description = "A spider Familiar that weaves webs for Melinoë", IsHidden = false },
+                new Pet { PetId = 5, Name = "Toula", IconUrl = "/images/pets/toula.png", Description = "A bat Familiar that scouts ahead for Melinoë", IsHidden = false }
             };
         }
 
