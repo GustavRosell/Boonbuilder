@@ -98,10 +98,14 @@ const BoonBuilder: React.FC = () => {
       try {
         const selectedBoonIds = extractSelectedBoonIds(selectedBuild.boons);
         const availableBoonsResponse = await boonsApi.getAvailable(selectedBoonIds);
-        const { availableDuo, availableLegendary } = filterAvailableBoons(availableBoonsResponse);
+        const { availableDuo, availableLegendary, lockedDuo, lockedLegendary } = filterAvailableBoons(availableBoonsResponse);
 
-        setAvailableDuoBoons(availableBoonsResponse.duoBoons);
-        setAvailableLegendaryBoons(availableBoonsResponse.legendaryBoons);
+        // Show both available and locked boons; available first for better UX
+        const sortedDuo = [...availableDuo, ...lockedDuo];
+        const sortedLegendary = [...availableLegendary, ...lockedLegendary];
+
+        setAvailableDuoBoons(sortedDuo);
+        setAvailableLegendaryBoons(sortedLegendary);
       } catch (err) {
         console.error('Error loading available boons:', err);
       }
@@ -109,6 +113,10 @@ const BoonBuilder: React.FC = () => {
 
     if (selectedBuild.boons.size > 0) {
       updateAvailableBoons();
+    } else {
+      // When no boons selected, still show all boons but they'll all be marked as locked
+      setAvailableDuoBoons([]);
+      setAvailableLegendaryBoons([]);
     }
   }, [selectedBuild.boons]);
 
@@ -212,12 +220,19 @@ const BoonBuilder: React.FC = () => {
                         {duoBoon.firstGod?.name} + {duoBoon.secondGod?.name}
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleRemoveDuoBoon(duoBoon.boonId)}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {!duoBoon.isAvailable && (
+                        <span className="text-[10px] uppercase tracking-wide bg-gray-800 text-yellow-300 px-2 py-0.5 rounded border border-yellow-500/30">
+                          Prereqs not met
+                        </span>
+                      )}
+                      <button
+                        onClick={() => handleRemoveDuoBoon(duoBoon.boonId)}
+                        className="text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -239,7 +254,14 @@ const BoonBuilder: React.FC = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <div className="text-white font-medium text-sm">{legendaryBoon.name}</div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="text-white font-medium text-sm">{legendaryBoon.name}</div>
+                        {!legendaryBoon.isAvailable && (
+                          <span className="px-2 py-0.5 bg-red-600/80 text-red-100 text-xs rounded-full">
+                            Prereqs not met
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-orange-300">{legendaryBoon.god?.name}</div>
                     </div>
                     <button

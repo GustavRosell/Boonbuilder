@@ -17,7 +17,9 @@
       "Bash(npm uninstall:*)",
       "Bash(del boonbuilder.db)",
       "Bash(rm:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(dotnet run:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

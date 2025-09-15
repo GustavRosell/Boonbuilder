@@ -70,6 +70,10 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     const y = Math.sin(angle) * radius;
     const isHovered = hoveredItem === index;
 
+    // Check if this is a special boon with availability status
+    const isSpecialBoon = (item as any)?.hasOwnProperty?.('isAvailable');
+    const isAvailable = isSpecialBoon ? (item as AvailableBoon).isAvailable : true;
+
     // Get item properties based on type
     const getName = (item: any): string => {
       if ('name' in item) return item.name;
@@ -82,11 +86,27 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
       return '?';
     };
 
+    // Get tooltip text for locked boons
+    const getTooltipText = (): string => {
+      const baseName = getName(item);
+      if (isSpecialBoon && !isAvailable) {
+        const availableBoon = item as AvailableBoon;
+        if (availableBoon.type === 'Duo' && availableBoon.firstGod && availableBoon.secondGod) {
+          return `${baseName} (Locked: Need boons from ${availableBoon.firstGod.name} and ${availableBoon.secondGod.name})`;
+        } else if (availableBoon.type === 'Legendary' && availableBoon.god) {
+          return `${baseName} (Locked: Need multiple boons from ${availableBoon.god.name})`;
+        }
+        return `${baseName} (Prerequisites not met)`;
+      }
+      return baseName;
+    };
+
     return (
       <div
         key={`${getName(item)}-${index}`}
         className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 cursor-pointer
-          ${isHovered ? 'scale-125 z-20' : 'scale-100 z-10'}`}
+          ${isHovered ? 'scale-125 z-20' : 'scale-100 z-10'}
+          ${!isAvailable ? 'opacity-60 grayscale' : ''}`}
         style={{
           left: `calc(50% + ${x}px)`,
           top: `calc(50% + ${y}px)`,
@@ -94,11 +114,12 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         onMouseEnter={() => setHoveredItem(index)}
         onMouseLeave={() => setHoveredItem(null)}
         onClick={() => handleItemClick(item)}
+        title={getTooltipText()}
       >
         <div className={`
-          w-20 h-20 rounded-full flex items-center justify-center
+          relative w-20 h-20 rounded-full flex items-center justify-center
           bg-gradient-to-br from-purple-600/90 to-blue-600/90
-          border-2 ${isHovered ? 'border-yellow-400' : 'border-purple-300'}
+          border-2 ${isHovered ? 'border-yellow-400' : isAvailable ? 'border-purple-300' : 'border-gray-500'}
           shadow-xl backdrop-blur-sm
           ${isHovered ? 'shadow-yellow-400/50' : 'shadow-purple-500/30'}
           transform transition-all duration-300
@@ -113,12 +134,19 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
           ) : (
             <span className="text-2xl">{getIcon(item)}</span>
           )}
+
+          {/* Lock badge overlay for locked boons */}
+          {isSpecialBoon && !isAvailable && (
+            <div className="absolute -top-1 -right-1 bg-gray-900/90 text-yellow-300 text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-yellow-500/50">
+              <span>🔒</span>
+            </div>
+          )}
         </div>
         {isHovered && (
           <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2
             bg-gray-900/95 text-white px-3 py-1 rounded-lg whitespace-nowrap text-sm
-            border border-purple-400 shadow-lg z-30">
-            {getName(item)}
+            border border-purple-400 shadow-lg z-30 max-w-xs text-center">
+            {getTooltipText()}
           </div>
         )}
       </div>
