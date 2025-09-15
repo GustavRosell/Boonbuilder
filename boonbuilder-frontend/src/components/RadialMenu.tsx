@@ -1,42 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { God, Boon, BoonSlot, RadialMenuItem, Weapon, WeaponAspect, AvailableBoon } from '../types';
+import { God, Boon, BoonSlot, RadialMenuItem, Weapon, WeaponAspect, Pet, AvailableBoon } from '../types';
 import ImageWithFallback from './ImageWithFallback';
 
 interface RadialMenuProps {
   gods: God[];
   boons: Boon[];
   weapons: Weapon[];
+  pets: Pet[];
   availableDuoBoons: AvailableBoon[];
   availableLegendaryBoons: AvailableBoon[];
   onSelectBoon: (boon: Boon, slot: BoonSlot) => void;
   onSelectDuoBoon: (boon: AvailableBoon) => void;
   onSelectLegendaryBoon: (boon: AvailableBoon) => void;
   onSelectWeapon: (weapon: Weapon, aspect: WeaponAspect) => void;
+  onSelectPet: (pet: Pet) => void;
   selectedBoons: Map<BoonSlot, Boon>;
   selectedDuoBoons: AvailableBoon[];
   selectedLegendaryBoons: AvailableBoon[];
   selectedWeapon?: Weapon;
   selectedAspect?: WeaponAspect;
+  selectedPet?: Pet;
 }
 
-type MenuState = 'main' | 'weapon' | 'aspect' | 'god' | 'boon' | 'legendary' | 'duo';
+type MenuState = 'main' | 'weapon' | 'aspect' | 'pet' | 'god' | 'boon' | 'legendary' | 'duo';
 
 const RadialMenu: React.FC<RadialMenuProps> = ({
   gods,
   boons,
   weapons,
+  pets,
   availableDuoBoons,
   availableLegendaryBoons,
   onSelectBoon,
   onSelectDuoBoon,
   onSelectLegendaryBoon,
   onSelectWeapon,
+  onSelectPet,
   selectedBoons,
   selectedDuoBoons,
   selectedLegendaryBoons,
   selectedWeapon,
   selectedAspect,
+  selectedPet,
 }) => {
   const [menuState, setMenuState] = useState<MenuState>('main');
   const [selectedSlot, setSelectedSlot] = useState<BoonSlot | null>(null);
@@ -50,17 +56,18 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   // Slot definitions for the main menu
   const slots: RadialMenuItem[] = [
     { id: 'weapon', name: 'Weapon', icon: '⚔️', angle: 0 },
-    { id: 'attack', name: 'Attack', icon: '⚡', angle: 45 },
-    { id: 'special', name: 'Special', icon: '✨', angle: 90 },
-    { id: 'cast', name: 'Cast', icon: '🔮', angle: 135 },
-    { id: 'sprint', name: 'Sprint', icon: '💨', angle: 180 },
-    { id: 'magick', name: 'Magick', icon: '💫', angle: 225 },
-    { id: 'legendary', name: 'Legendary', icon: '⭐', angle: 270 },
-    { id: 'duo', name: 'Duo', icon: '🤝', angle: 315 }
+    { id: 'pet', name: 'Pet', icon: '🐸', angle: 40 },
+    { id: 'attack', name: 'Attack', icon: '⚡', angle: 80 },
+    { id: 'special', name: 'Special', icon: '✨', angle: 120 },
+    { id: 'cast', name: 'Cast', icon: '🔮', angle: 160 },
+    { id: 'sprint', name: 'Sprint', icon: '💨', angle: 200 },
+    { id: 'magick', name: 'Magick', icon: '💫', angle: 240 },
+    { id: 'legendary', name: 'Legendary', icon: '⭐', angle: 280 },
+    { id: 'duo', name: 'Duo', icon: '🤝', angle: 320 }
   ];
 
   const renderRadialItem = (
-    item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | AvailableBoon,
+    item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Pet | AvailableBoon,
     index: number,
     total: number,
     radius: number = 150
@@ -153,12 +160,14 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     );
   };
 
-  const handleItemClick = (item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | AvailableBoon) => {
+  const handleItemClick = (item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Pet | AvailableBoon) => {
     if (menuState === 'main') {
       // Handle slot selection
       const slotItem = item as RadialMenuItem;
       if (slotItem.id === 'weapon') {
         setMenuState('weapon');
+      } else if (slotItem.id === 'pet') {
+        setMenuState('pet');
       } else if (slotItem.id === 'legendary') {
         setMenuState('legendary');
       } else if (slotItem.id === 'duo') {
@@ -191,6 +200,11 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
       // Handle duo boon selection
       const duoBoon = item as AvailableBoon;
       onSelectDuoBoon(duoBoon);
+      setMenuState('main');
+    } else if (menuState === 'pet') {
+      // Handle pet selection
+      const pet = item as Pet;
+      onSelectPet(pet);
       setMenuState('main');
     } else if (menuState === 'god') {
       // Handle god selection
@@ -325,6 +339,8 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         return weapons;
       case 'aspect':
         return getFilteredAspects();
+      case 'pet':
+        return pets;
       case 'legendary':
         return availableLegendaryBoons;
       case 'duo':

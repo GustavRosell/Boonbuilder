@@ -147,6 +147,14 @@ export interface Weapon {
   aspects: WeaponAspect[];
 }
 
+export interface Pet {
+  petId: number;
+  name: string;
+  iconUrl: string;
+  description: string;
+  isHidden: boolean;
+}
+
 export interface Build {
   buildId: number;
   name: string;
@@ -217,6 +225,7 @@ export interface RadialMenuItem {
 export interface BuildState {
   weapon?: Weapon;
   aspect?: WeaponAspect;
+  pet?: Pet;
   boons: Map<BoonSlot, Boon>;
   duoBoons: AvailableBoon[];
   legendaryBoons: AvailableBoon[];

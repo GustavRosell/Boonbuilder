@@ -3,6 +3,7 @@ import {
   God,
   Boon,
   Weapon,
+  Pet,
   Build,
   AuthResponse,
   LoginRequest,
@@ -126,6 +127,19 @@ export const weaponsApi = {
 
   getById: async (id: number): Promise<Weapon> => {
     const response = await api.get(`/weapons/${id}`);
+    return response.data;
+  },
+};
+
+// Pets API
+export const petsApi = {
+  getAll: async (): Promise<Pet[]> => {
+    const response = await api.get('/pets');
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Pet> => {
+    const response = await api.get(`/pets/${id}`);
     return response.data;
   },
 };
