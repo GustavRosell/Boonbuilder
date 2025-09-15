@@ -357,6 +357,84 @@ GET /api/weapons
 GET /api/weapons/{id}
 ```
 
+### Pets
+
+#### Get All Pets
+```http
+GET /api/pets
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "petId": 1,
+      "name": "Frinos",
+      "description": "A toad Familiar who helps Melinoë in battles and exploration",
+      "iconUrl": "/images/pets/frinos.png",
+      "isHidden": false
+    },
+    {
+      "petId": 2,
+      "name": "Gale",
+      "description": "A Harpy Familiar who soars alongside Melinoë",
+      "iconUrl": "/images/pets/gale.png",
+      "isHidden": false
+    },
+    {
+      "petId": 3,
+      "name": "Hecuba",
+      "description": "A ghostly dog Familiar loyal to Melinoë",
+      "iconUrl": "/images/pets/hecuba.png",
+      "isHidden": false
+    },
+    {
+      "petId": 4,
+      "name": "Raki",
+      "description": "A spider Familiar that weaves webs for Melinoë",
+      "iconUrl": "/images/pets/raki.png",
+      "isHidden": false
+    },
+    {
+      "petId": 5,
+      "name": "Toula",
+      "description": "A bat Familiar that scouts ahead for Melinoë",
+      "iconUrl": "/images/pets/toula.png",
+      "isHidden": false
+    }
+  ]
+}
+```
+
+**Features:**
+- Returns all available pets for build selection
+- Hidden pets are filtered out in the API response
+- Includes authentic game descriptions and asset paths
+
+#### Get Pet by ID
+```http
+GET /api/pets/{id}
+```
+
+**Parameters:**
+- `id` (integer): Pet ID
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "petId": 1,
+    "name": "Frinos",
+    "description": "A toad Familiar who helps Melinoë in battles and exploration",
+    "iconUrl": "/images/pets/frinos.png",
+    "isHidden": false
+  }
+}
+```
+
 ### Builds
 
 #### Get User Builds
@@ -597,6 +675,17 @@ enum ElementType {
   Water = 3,
   Fire = 4,
   Aether = 5
+}
+```
+
+### Pet Structure
+```typescript
+interface Pet {
+  petId: number;
+  name: string;
+  iconUrl: string;
+  description: string;
+  isHidden: boolean;
 }
 ```
 
