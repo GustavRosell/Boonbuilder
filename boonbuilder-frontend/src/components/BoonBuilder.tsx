@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn } from 'lucide-react';
 import RadialMenu from './RadialMenu';
-import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, AvailableBoon, AvailableBoonsResponse } from '../types';
-import { godsApi, boonsApi, weaponsApi } from '../services/api';
-import { extractSelectedBoonIds, filterAvailableBoons, calculateBuildCompletion, validateBuild } from '../utils/boonPrerequisites';
+import LoadoutPanel from './LoadoutPanel';
+import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Pet, AvailableBoon } from '../types';
+import { godsApi, boonsApi, weaponsApi, petsApi } from '../services/api';
+import { extractSelectedBoonIds, filterAvailableBoons } from '../utils/boonPrerequisites';
 
 type PageType = 'home' | 'browse' | 'creator' | 'community' | 'favorites';
 
@@ -22,6 +23,7 @@ const BoonBuilder: React.FC = () => {
   const [gods, setGods] = useState<God[]>([]);
   const [boons, setBoons] = useState<Boon[]>([]);
   const [weapons, setWeapons] = useState<Weapon[]>([]);
+  const [pets, setPets] = useState<Pet[]>([]);
   const [availableDuoBoons, setAvailableDuoBoons] = useState<AvailableBoon[]>([]);
   const [availableLegendaryBoons, setAvailableLegendaryBoons] = useState<AvailableBoon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,15 +34,17 @@ const BoonBuilder: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [godsData, boonsData, weaponsData] = await Promise.all([
+        const [godsData, boonsData, weaponsData, petsData] = await Promise.all([
           godsApi.getAll(),
           boonsApi.getAll(),
-          weaponsApi.getAll()
+          weaponsApi.getAll(),
+          petsApi.getAll()
         ]);
 
         setGods(godsData);
         setBoons(boonsData);
         setWeapons(weaponsData);
+        setPets(petsData);
       } catch (err) {
         setError('Failed to load data. Please check if the API server is running.');
         console.error('Error loading data:', err);
@@ -70,6 +74,14 @@ const BoonBuilder: React.FC = () => {
 
   const handleRemoveWeapon = () => {
     setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined });
+  };
+
+  const handleSelectPet = (pet: Pet) => {
+    setSelectedBuild({ ...selectedBuild, pet });
+  };
+
+  const handleRemovePet = () => {
+    setSelectedBuild({ ...selectedBuild, pet: undefined });
   };
 
   const handleSelectDuoBoon = (boon: AvailableBoon) => {
@@ -120,189 +132,6 @@ const BoonBuilder: React.FC = () => {
     }
   }, [selectedBuild.boons]);
 
-  const renderLoadout = () => {
-    const slots = [
-      { slot: BoonSlot.Attack, name: 'Attack', icon: '⚡' },
-      { slot: BoonSlot.Special, name: 'Special', icon: '✨' },
-      { slot: BoonSlot.Cast, name: 'Cast', icon: '🔮' },
-      { slot: BoonSlot.Sprint, name: 'Sprint', icon: '💨' },
-      { slot: BoonSlot.Magick, name: 'Magick', icon: '💫' }
-    ];
-
-    return (
-      <div className="bg-gray-800/50 rounded-xl p-6 backdrop-blur-sm border border-purple-500/30 h-full flex flex-col">
-        <h3 className="text-xl font-bold text-purple-300 mb-4">Current Loadout</h3>
-        <div className="space-y-3 flex-1 overflow-y-auto">
-          {/* Weapon Section */}
-          <div className="flex items-center space-x-3 p-3 bg-gray-700/50 rounded-lg border-b border-gray-600">
-            <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-              {selectedBuild.weapon ? (
-                <img
-                  src={selectedBuild.weapon.iconUrl}
-                  alt={selectedBuild.weapon.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-gray-400 text-lg">⚔️</span>
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="text-sm text-gray-400">Weapon</div>
-              <div className="text-white font-medium">
-                {selectedBuild.weapon ? selectedBuild.weapon.name : 'No Weapon Selected'}
-              </div>
-              {selectedBuild.aspect && (
-                <div className="text-xs text-purple-300">{selectedBuild.aspect.name}</div>
-              )}
-            </div>
-            {selectedBuild.weapon && (
-              <button
-                onClick={handleRemoveWeapon}
-                className="text-red-400 hover:text-red-300 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-          {slots.map(({ slot, name, icon }) => {
-            const boon = selectedBuild.boons.get(slot);
-            return (
-              <div key={slot} className="flex items-center space-x-3 p-3 bg-gray-700/50 rounded-lg">
-                <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center">
-                  {boon ? (
-                    <img
-                      src={boon.iconUrl}
-                      alt={boon.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-gray-400 text-lg">{icon}</span>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm text-gray-400 capitalize">{name}</div>
-                  <div className="text-white font-medium">
-                    {boon ? boon.name : 'Empty Slot'}
-                  </div>
-                  {boon && boon.god && (
-                    <div className="text-xs text-purple-300">{boon.god.name}</div>
-                  )}
-                </div>
-                {boon && (
-                  <button
-                    onClick={() => handleRemoveBoon(slot)}
-                    className="text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Duo Boons Section */}
-          {selectedBuild.duoBoons.length > 0 && (
-            <>
-              <div className="mt-4 pt-4 border-t border-gray-600">
-                <h4 className="text-sm font-semibold text-yellow-300 mb-2">Duo Boons</h4>
-                {selectedBuild.duoBoons.map((duoBoon) => (
-                  <div key={duoBoon.boonId} className="flex items-center space-x-3 p-2 bg-yellow-900/20 rounded-lg mb-2">
-                    <div className="w-10 h-10 rounded-full bg-yellow-600 flex items-center justify-center">
-                      <img
-                        src={duoBoon.iconUrl}
-                        alt={duoBoon.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-medium text-sm">{duoBoon.name}</div>
-                      <div className="text-xs text-yellow-300">
-                        {duoBoon.firstGod?.name} + {duoBoon.secondGod?.name}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!duoBoon.isAvailable && (
-                        <span className="text-[10px] uppercase tracking-wide bg-gray-800 text-yellow-300 px-2 py-0.5 rounded border border-yellow-500/30">
-                          Prereqs not met
-                        </span>
-                      )}
-                      <button
-                        onClick={() => handleRemoveDuoBoon(duoBoon.boonId)}
-                        className="text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Legendary Boons Section */}
-          {selectedBuild.legendaryBoons.length > 0 && (
-            <>
-              <div className="mt-4 pt-4 border-t border-gray-600">
-                <h4 className="text-sm font-semibold text-orange-300 mb-2">Legendary Boons</h4>
-                {selectedBuild.legendaryBoons.map((legendaryBoon) => (
-                  <div key={legendaryBoon.boonId} className="flex items-center space-x-3 p-2 bg-orange-900/20 rounded-lg mb-2">
-                    <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center">
-                      <img
-                        src={legendaryBoon.iconUrl}
-                        alt={legendaryBoon.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="text-white font-medium text-sm">{legendaryBoon.name}</div>
-                        {!legendaryBoon.isAvailable && (
-                          <span className="px-2 py-0.5 bg-red-600/80 text-red-100 text-xs rounded-full">
-                            Prereqs not met
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-xs text-orange-300">{legendaryBoon.god?.name}</div>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveLegendaryBoon(legendaryBoon.boonId)}
-                      className="text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-gray-700">
-          <h4 className="text-lg font-semibold text-purple-300 mb-3">Build Details</h4>
-          <input
-            type="text"
-            placeholder="Build Name"
-            value={selectedBuild.name}
-            onChange={(e) => setSelectedBuild({ ...selectedBuild, name: e.target.value })}
-            className="w-full px-4 py-2 bg-gray-700/50 rounded-lg border border-purple-500/30
-              focus:border-purple-400 focus:outline-none mb-3 text-white"
-          />
-          <textarea
-            placeholder="Build Description"
-            rows={3}
-            value={selectedBuild.description}
-            onChange={(e) => setSelectedBuild({ ...selectedBuild, description: e.target.value })}
-            className="w-full px-4 py-2 bg-gray-700/50 rounded-lg border border-purple-500/30
-              focus:border-purple-400 focus:outline-none mb-3 text-white resize-none"
-          />
-          <button className="w-full py-2 bg-gradient-to-r from-purple-600 to-blue-600
-            hover:from-purple-700 hover:to-blue-700 rounded-lg font-semibold transition-all">
-            Save Build
-          </button>
-        </div>
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -411,29 +240,39 @@ const BoonBuilder: React.FC = () => {
         <main className="p-6">
           {currentPage === 'creator' ? (
             <div className="flex gap-6 h-[calc(100vh-8rem)]">
-              {/* Left side - Radial Menu */}
+              {/* Center - Loadout Panel */}
+              <LoadoutPanel
+                selectedBuild={selectedBuild}
+                onRemoveBoon={handleRemoveBoon}
+                onRemoveWeapon={handleRemoveWeapon}
+                onRemovePet={handleRemovePet}
+                onRemoveDuoBoon={handleRemoveDuoBoon}
+                onRemoveLegendaryBoon={handleRemoveLegendaryBoon}
+                onBuildNameChange={(name) => setSelectedBuild({ ...selectedBuild, name })}
+                onBuildDescriptionChange={(description) => setSelectedBuild({ ...selectedBuild, description })}
+              />
+
+              {/* Right side - Radial Menu */}
               <div className="flex-1 flex items-center justify-center bg-gray-800/30 rounded-xl p-4">
                 <RadialMenu
                   gods={gods}
                   boons={boons}
                   weapons={weapons}
+                  pets={pets}
                   availableDuoBoons={availableDuoBoons}
                   availableLegendaryBoons={availableLegendaryBoons}
                   onSelectBoon={handleSelectBoon}
                   onSelectDuoBoon={handleSelectDuoBoon}
                   onSelectLegendaryBoon={handleSelectLegendaryBoon}
                   onSelectWeapon={handleSelectWeapon}
+                  onSelectPet={handleSelectPet}
                   selectedBoons={selectedBuild.boons}
                   selectedDuoBoons={selectedBuild.duoBoons}
                   selectedLegendaryBoons={selectedBuild.legendaryBoons}
                   selectedWeapon={selectedBuild.weapon}
                   selectedAspect={selectedBuild.aspect}
+                  selectedPet={selectedBuild.pet}
                 />
-              </div>
-
-              {/* Right side - Loadout */}
-              <div className="w-[400px]">
-                {renderLoadout()}
               </div>
             </div>
           ) : currentPage === 'home' ? (
