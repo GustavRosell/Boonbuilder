@@ -19,7 +19,9 @@
       "Bash(rm:*)",
       "Bash(node:*)",
       "Bash(dotnet run:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(npm start)",
+      "Bash(del \"C:\\Users\\Gusta\\OneDrive\\Dokumenter\\GitHub\\Boonbuilder\\BoonBuilder.API\\boonbuilder.db\")"
     ],
     "deny": [],
     "ask": []

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BoonBuilder.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0558898b0ff1d927173ea552dfd57845b86ca036")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f8bb47f335e8d5fd8caeb05fc721d78fefe06502")]
 [assembly: System.Reflection.AssemblyProductAttribute("BoonBuilder.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BoonBuilder.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

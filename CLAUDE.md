@@ -86,3 +86,27 @@ Frontend and backend enums must match exactly:
 - God relationships in API responses are nested objects, not IDs
 - Database automatically seeds comprehensive game data on startup
 - RadialMenu supports both weapon/aspect and boon selection workflows
+
+## Documentation Files
+
+When working on BoonBuilder, consult these comprehensive documentation files for context:
+
+- **[docs/PRD.md](docs/PRD.md)**: Product requirements, user stories, and feature specifications
+- **[docs/CHANGELOG.md](docs/CHANGELOG.md)**: Version history, changes, and migration notes
+- **[docs/ADR.md](docs/ADR.md)**: Architectural decisions and technical rationale
+- **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**: Development guidelines, workflows, and coding standards
+- **[docs/API.md](docs/API.md)**: Complete API documentation with examples and data models
+- **[IMAGE_GUIDE.md](IMAGE_GUIDE.md)**: Asset replacement workflow and image management
+
+### Documentation Maintenance Guidelines
+
+Always update relevant documentation when making changes:
+
+- **Add entries to CHANGELOG.md** for any user-facing changes or bug fixes
+- **Create ADR entries** for significant technical or architectural decisions
+- **Update API.md** when modifying endpoints, adding new routes, or changing data models
+- **Keep PRD.md current** with feature additions, user story changes, or requirement updates
+- **Update CONTRIBUTING.md** when changing development workflows, adding new tools, or modifying coding standards
+- **Maintain IMAGE_GUIDE.md** when changing asset management processes or directory structures
+
+This documentation structure ensures comprehensive project context, facilitates onboarding, and maintains institutional knowledge for long-term development success.
