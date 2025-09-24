@@ -15,16 +15,38 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactApp",
         policy => policy
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:3000",                    // Local development
+                "https://*.railway.app",                    // Railway deployments
+                Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000"  // Custom domain
+            )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
 });
 
-// Add Entity Framework with SQLite
+// Add Entity Framework with SQLite (dev) or PostgreSQL (production)
 builder.Services.AddDbContext<BoonBuilderContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=boonbuilder.db"));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+    if (!string.IsNullOrEmpty(databaseUrl))
+    {
+        // Railway PostgreSQL connection
+        options.UseNpgsql(databaseUrl);
+    }
+    else if (!string.IsNullOrEmpty(connectionString))
+    {
+        // Local SQLite connection
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        // Fallback to default SQLite
+        options.UseSqlite("Data Source=boonbuilder.db");
+    }
+});
 
 // Register services
 builder.Services.AddScoped<BoonBuilder.Services.IBoonService, BoonBuilder.Services.BoonService>();
