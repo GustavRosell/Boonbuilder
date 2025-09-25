@@ -3,6 +3,23 @@ using Microsoft.AspNetCore.Identity;
 using BoonBuilder.Data;
 using BoonBuilder.Models;
 
+// Helper function to convert PostgreSQL URL to Npgsql connection string
+static string ConvertPostgresUrlToConnectionString(string databaseUrl)
+{
+    try
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+
+        return $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};";
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+        throw;
+    }
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
@@ -52,9 +69,14 @@ builder.Services.AddDbContext<BoonBuilderContext>(options =>
 
     if (!string.IsNullOrEmpty(databaseUrl))
     {
-        // Railway PostgreSQL connection
+        // Railway PostgreSQL connection - convert URL format to Npgsql format
         Console.WriteLine($"Using PostgreSQL with DATABASE_URL");
-        options.UseNpgsql(databaseUrl);
+
+        // Parse the PostgreSQL URL and convert to Npgsql connection string format
+        var connectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
+        Console.WriteLine($"Converted connection string: {connectionString}");
+
+        options.UseNpgsql(connectionString);
     }
     else if (!string.IsNullOrEmpty(connectionString))
     {
