@@ -3,6 +3,43 @@ using Microsoft.AspNetCore.Identity;
 using BoonBuilder.Data;
 using BoonBuilder.Models;
 
+// Helper function for resilient database migration execution
+static async Task RunMigrationsWithRetryAsync(BoonBuilderContext context)
+{
+    const int maxRetries = 5;
+    var baseDelay = TimeSpan.FromSeconds(2);
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            Console.WriteLine($"Attempting database migration (attempt {attempt}/{maxRetries})");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("Database migration completed successfully");
+            return;
+        }
+        catch (Exception ex)
+        {
+            var isTransientError = ex.Message.Contains("57P03") || // PostgreSQL startup error
+                                   ex.Message.Contains("connection") ||
+                                   ex.Message.Contains("timeout") ||
+                                   ex.Message.Contains("network");
+
+            Console.WriteLine($"Migration attempt {attempt} failed: {ex.Message}");
+
+            if (attempt == maxRetries || !isTransientError)
+            {
+                Console.WriteLine($"Final migration attempt failed. Error: {ex.Message}");
+                throw;
+            }
+
+            var delay = TimeSpan.FromMilliseconds(baseDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+            Console.WriteLine($"Retrying migration in {delay.TotalSeconds} seconds...");
+            await Task.Delay(delay);
+        }
+    }
+}
+
 // Helper function to convert PostgreSQL URL to Npgsql connection string
 static string ConvertPostgresUrlToConnectionString(string databaseUrl)
 {
@@ -130,8 +167,8 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<BoonBuilderContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    // Run migrations to create/update database
-    await context.Database.MigrateAsync();
+    // Run migrations to create/update database with retry logic for PostgreSQL startup
+    await RunMigrationsWithRetryAsync(context);
 
     // Seed data
     await BoonSeeder.SeedAsync(context, userManager);
