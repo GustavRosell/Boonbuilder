@@ -60,7 +60,7 @@ builder.Services.AddDbContext<BoonBuilderContext>(options =>
     foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
     {
         var key = env.Key.ToString();
-        if (key.Contains("DATABASE") || key.Contains("POSTGRES") || key.Contains("DB"))
+        if (key?.Contains("DATABASE") == true || key?.Contains("POSTGRES") == true || key?.Contains("DB") == true)
         {
             Console.WriteLine($"{key}: {env.Value}");
         }
@@ -73,10 +73,10 @@ builder.Services.AddDbContext<BoonBuilderContext>(options =>
         Console.WriteLine($"Using PostgreSQL with DATABASE_URL");
 
         // Parse the PostgreSQL URL and convert to Npgsql connection string format
-        var connectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
-        Console.WriteLine($"Converted connection string: {connectionString}");
+        var npgsqlConnectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
+        Console.WriteLine($"Converted connection string: {npgsqlConnectionString}");
 
-        options.UseNpgsql(connectionString);
+        options.UseNpgsql(npgsqlConnectionString);
     }
     else if (!string.IsNullOrEmpty(connectionString))
     {
