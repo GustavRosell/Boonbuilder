@@ -106,10 +106,6 @@ const BoonBuilder: React.FC = () => {
     setSelectedBuild({ ...selectedBuild, legendaryBoons: newLegendaryBoons });
   };
 
-  const handleSelectNonCoreBoon = (boon: Boon) => {
-    const newNonCoreBoons = [...selectedBuild.nonCoreBoons, boon];
-    setSelectedBuild({ ...selectedBuild, nonCoreBoons: newNonCoreBoons });
-  };
 
   const handleRemoveNonCoreBoon = (boonId: number) => {
     const newNonCoreBoons = selectedBuild.nonCoreBoons.filter(boon => boon.boonId !== boonId);

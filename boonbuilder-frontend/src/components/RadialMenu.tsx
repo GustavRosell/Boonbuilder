@@ -49,7 +49,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   const [selectedGod, setSelectedGod] = useState<God | null>(null);
   const [selectedWeaponForAspect, setSelectedWeaponForAspect] = useState<Weapon | null>(null);
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
-  const [rotation, setRotation] = useState(0);
+  const [rotation] = useState(0);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 

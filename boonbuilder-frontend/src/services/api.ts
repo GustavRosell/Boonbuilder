@@ -9,7 +9,6 @@ import {
   LoginRequest,
   RegisterRequest,
   BuildTier,
-  BoonType,
   AvailableBoonsResponse,
   BoonPrerequisiteDetails
 } from '../types';
