@@ -29,7 +29,9 @@
       "Bash(copy Pet.cs Familiar.cs)",
       "Bash(dotnet ef database:*)",
       "WebSearch",
-      "Bash(railway login:*)"
+      "Bash(railway login:*)",
+      "Bash(git push:*)",
+      "Bash(railway link:*)"
     ],
     "deny": [],
     "ask": []
