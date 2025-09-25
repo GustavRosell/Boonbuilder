@@ -31,19 +31,41 @@ builder.Services.AddDbContext<BoonBuilderContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
+    // Debug logging for Railway deployment
+    Console.WriteLine($"=== DATABASE CONNECTION DEBUG ===");
+    Console.WriteLine($"DefaultConnection: {connectionString ?? "NULL"}");
+    Console.WriteLine($"DATABASE_URL: {databaseUrl ?? "NULL"}");
+    Console.WriteLine($"DATABASE_URL Length: {databaseUrl?.Length ?? 0}");
+    Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+
+    // List all environment variables that contain "DATABASE" or "POSTGRES"
+    Console.WriteLine("=== RELEVANT ENVIRONMENT VARIABLES ===");
+    foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
+    {
+        var key = env.Key.ToString();
+        if (key.Contains("DATABASE") || key.Contains("POSTGRES") || key.Contains("DB"))
+        {
+            Console.WriteLine($"{key}: {env.Value}");
+        }
+    }
+    Console.WriteLine("=====================================");
+
     if (!string.IsNullOrEmpty(databaseUrl))
     {
         // Railway PostgreSQL connection
+        Console.WriteLine($"Using PostgreSQL with DATABASE_URL");
         options.UseNpgsql(databaseUrl);
     }
     else if (!string.IsNullOrEmpty(connectionString))
     {
         // Local SQLite connection
+        Console.WriteLine($"Using SQLite with DefaultConnection");
         options.UseSqlite(connectionString);
     }
     else
     {
         // Fallback to default SQLite
+        Console.WriteLine($"Using fallback SQLite");
         options.UseSqlite("Data Source=boonbuilder.db");
     }
 });
