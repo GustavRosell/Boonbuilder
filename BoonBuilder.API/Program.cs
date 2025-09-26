@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using BoonBuilder.Data;
 using BoonBuilder.Models;
+using System.Linq;
 
 // Helper function for resilient database migration execution
 static async Task RunMigrationsWithRetryAsync(BoonBuilderContext context)
@@ -167,8 +168,30 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<BoonBuilderContext>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    // Run migrations to create/update database with retry logic for PostgreSQL startup
-    await RunMigrationsWithRetryAsync(context);
+    // Check for optional migration skip during debugging
+    var skipMigrations = (Environment.GetEnvironmentVariable("SKIP_MIGRATIONS") ?? "false").ToLower() == "true";
+
+    // Debug: list migrations present in the assembly and DB
+    var allMigrations = context.Database.GetMigrations().ToArray();
+    var appliedMigrations = context.Database.GetAppliedMigrations().ToArray();
+    var pendingMigrations = context.Database.GetPendingMigrations().ToArray();
+
+    Console.WriteLine($"=== MIGRATION DIAGNOSTICS ===");
+    Console.WriteLine($"Migrations in assembly: {string.Join(',', allMigrations)}");
+    Console.WriteLine($"Applied on DB: {string.Join(',', appliedMigrations)}");
+    Console.WriteLine($"Pending on DB: {string.Join(',', pendingMigrations)}");
+    Console.WriteLine($"Skip migrations flag: {skipMigrations}");
+    Console.WriteLine($"==============================");
+
+    if (!skipMigrations)
+    {
+        // Run migrations to create/update database with retry logic for PostgreSQL startup
+        await RunMigrationsWithRetryAsync(context);
+    }
+    else
+    {
+        Console.WriteLine("SKIP_MIGRATIONS=true; skipping automatic migrations at startup.");
+    }
 
     // Seed data
     await BoonSeeder.SeedAsync(context, userManager);

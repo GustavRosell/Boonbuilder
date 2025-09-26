@@ -31,7 +31,8 @@
       "WebSearch",
       "Bash(railway login:*)",
       "Bash(git push:*)",
-      "Bash(railway link:*)"
+      "Bash(railway link:*)",
+      "Bash(docker run:*)"
     ],
     "deny": [],
     "ask": []
