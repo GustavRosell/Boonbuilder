@@ -1,6 +1,6 @@
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "boonbuilder-frontend/Dockerfile"
 
 [deploy]
 numReplicas = 1

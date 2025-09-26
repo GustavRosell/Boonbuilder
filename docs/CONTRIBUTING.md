@@ -67,8 +67,25 @@ REACT_APP_API_URL=http://localhost:5291/api
 
 ### Database Management
 - Development uses SQLite (`boonbuilder.db`)
+- Production uses PostgreSQL (Railway)
 - Database auto-created and seeded on API startup
 - Reset database: `rm boonbuilder.db` then restart API
+
+### Railway Deployment
+For detailed Railway deployment instructions, see [RAILWAY.md](RAILWAY.md).
+
+**Quick Deploy Steps:**
+1. **API Service:** Connect to GitHub, set root to project root
+2. **Frontend Service:** Connect to GitHub, set root to `boonbuilder-frontend/`
+3. **PostgreSQL Service:** Add PostgreSQL service and link to API
+4. **Environment Variables:**
+   - Frontend: `REACT_APP_API_URL=https://your-api.railway.app/api`
+   - API: Automatically configured with DATABASE_URL
+
+**Common Issues:**
+- "Dockerfile does not exist": Check `dockerfilePath` in `railway.toml`
+- npm build fails: Ensure Dockerfile uses `npm ci` (not `--only=production`)
+- Service sleeps: Set `sleepApplication = false` in `railway.toml`
 
 ## Project Structure
 
