@@ -197,9 +197,29 @@ using (var scope = app.Services.CreateScope())
 
         if (canConnect && context.Database.ProviderName?.Contains("Npgsql") == true)
         {
-            // For PostgreSQL, test a simple query
-            var dbVersion = context.Database.ExecuteScalarAsync<string>("SELECT version()").GetAwaiter().GetResult();
-            Console.WriteLine($"PostgreSQL version: {dbVersion?.Substring(0, Math.Min(50, dbVersion.Length ?? 0))}...");
+            // For PostgreSQL, confirm connection is working
+            Console.WriteLine($"PostgreSQL connection established successfully");
+
+            // Optional: Try to get version info with proper error handling
+            try
+            {
+                using var command = context.Database.GetDbConnection().CreateCommand();
+                command.CommandText = "SELECT version()";
+                if (context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+                {
+                    await context.Database.OpenConnectionAsync();
+                }
+                var dbVersion = (await command.ExecuteScalarAsync())?.ToString();
+                if (!string.IsNullOrEmpty(dbVersion))
+                {
+                    Console.WriteLine($"PostgreSQL version: {dbVersion.Substring(0, Math.Min(50, dbVersion.Length))}...");
+                }
+                await context.Database.CloseConnectionAsync();
+            }
+            catch (Exception versionEx)
+            {
+                Console.WriteLine($"Could not retrieve PostgreSQL version: {versionEx.Message}");
+            }
         }
     }
     catch (Exception ex)
