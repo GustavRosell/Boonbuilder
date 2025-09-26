@@ -140,13 +140,35 @@ namespace BoonBuilder.API.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT");
 
+            // Safe conversion for UserFavorites.CreatedAt (TEXT -> timestamp with time zone)
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedAt_temp",
+                table: "UserFavorites",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE ""UserFavorites"" SET ""CreatedAt_temp"" = CASE
+                    WHEN ""CreatedAt"" IS NULL OR ""CreatedAt"" = '' THEN NULL
+                    WHEN ""CreatedAt"" ~ '^\d{4}-\d{2}-\d{2}' THEN ""CreatedAt""::timestamp with time zone
+                    ELSE NULL
+                END;");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "UserFavorites");
+
+            migrationBuilder.RenameColumn(
+                name: "CreatedAt_temp",
+                table: "UserFavorites",
+                newName: "CreatedAt");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "UserFavorites",
                 type: "timestamp with time zone",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
+                defaultValue: new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AlterColumn<int>(
                 name: "BuildId",
@@ -305,13 +327,35 @@ namespace BoonBuilder.API.Migrations
                 oldClrType: typeof(int),
                 oldType: "INTEGER");
 
+            // Safe conversion for Builds.UpdatedAt (TEXT -> timestamp with time zone)
+            migrationBuilder.AddColumn<DateTime>(
+                name: "UpdatedAt_temp",
+                table: "Builds",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE ""Builds"" SET ""UpdatedAt_temp"" = CASE
+                    WHEN ""UpdatedAt"" IS NULL OR ""UpdatedAt"" = '' THEN NULL
+                    WHEN ""UpdatedAt"" ~ '^\d{4}-\d{2}-\d{2}' THEN ""UpdatedAt""::timestamp with time zone
+                    ELSE NULL
+                END;");
+
+            migrationBuilder.DropColumn(
+                name: "UpdatedAt",
+                table: "Builds");
+
+            migrationBuilder.RenameColumn(
+                name: "UpdatedAt_temp",
+                table: "Builds",
+                newName: "UpdatedAt");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Builds",
                 type: "timestamp with time zone",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
+                defaultValue: new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AlterColumn<int>(
                 name: "Tier",
@@ -428,13 +472,35 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 2000);
 
+            // Safe conversion for Builds.CreatedAt (TEXT -> timestamp with time zone)
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedAt_temp",
+                table: "Builds",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE ""Builds"" SET ""CreatedAt_temp"" = CASE
+                    WHEN ""CreatedAt"" IS NULL OR ""CreatedAt"" = '' THEN NULL
+                    WHEN ""CreatedAt"" ~ '^\d{4}-\d{2}-\d{2}' THEN ""CreatedAt""::timestamp with time zone
+                    ELSE NULL
+                END;");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "Builds");
+
+            migrationBuilder.RenameColumn(
+                name: "CreatedAt_temp",
+                table: "Builds",
+                newName: "CreatedAt");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "Builds",
                 type: "timestamp with time zone",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
+                defaultValue: new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AlterColumn<string>(
                 name: "AuthorId",
@@ -888,14 +954,34 @@ namespace BoonBuilder.API.Migrations
                 oldMaxLength: 256,
                 oldNullable: true);
 
+            // Safe conversion for AspNetUsers.LockoutEnd (TEXT -> timestamp with time zone, DateTimeOffset)
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "LockoutEnd_temp",
+                table: "AspNetUsers",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE ""AspNetUsers"" SET ""LockoutEnd_temp"" = CASE
+                    WHEN ""LockoutEnd"" IS NULL OR ""LockoutEnd"" = '' THEN NULL
+                    WHEN ""LockoutEnd"" ~ '^\d{4}-\d{2}-\d{2}' THEN ""LockoutEnd""::timestamp with time zone
+                    ELSE NULL
+                END;");
+
+            migrationBuilder.DropColumn(
+                name: "LockoutEnd",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "LockoutEnd_temp",
+                table: "AspNetUsers",
+                newName: "LockoutEnd");
+
             migrationBuilder.AlterColumn<DateTimeOffset>(
                 name: "LockoutEnd",
                 table: "AspNetUsers",
                 type: "timestamp with time zone",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "TEXT",
-                oldNullable: true);
+                nullable: true);
 
             // Safe conversion for AspNetUsers.LockoutEnabled (INTEGER -> boolean)
             migrationBuilder.AddColumn<bool>(
@@ -970,13 +1056,35 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 100);
 
+            // Safe conversion for AspNetUsers.CreatedAt (TEXT -> timestamp with time zone)
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedAt_temp",
+                table: "AspNetUsers",
+                type: "timestamp with time zone",
+                nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE ""AspNetUsers"" SET ""CreatedAt_temp"" = CASE
+                    WHEN ""CreatedAt"" IS NULL OR ""CreatedAt"" = '' THEN NULL
+                    WHEN ""CreatedAt"" ~ '^\d{4}-\d{2}-\d{2}' THEN ""CreatedAt""::timestamp with time zone
+                    ELSE NULL
+                END;");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "CreatedAt_temp",
+                table: "AspNetUsers",
+                newName: "CreatedAt");
+
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
                 table: "AspNetUsers",
                 type: "timestamp with time zone",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
+                defaultValue: new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AlterColumn<string>(
                 name: "ConcurrencyStamp",

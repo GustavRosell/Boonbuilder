@@ -4,6 +4,114 @@ using BoonBuilder.Data;
 using BoonBuilder.Models;
 using System.Linq;
 
+// Helper function to safely perform database diagnostics with retry logic
+static async Task<string[]> PerformDatabaseDiagnosticsAsync(BoonBuilderContext context, bool skipMigrations)
+{
+    Console.WriteLine($"=== MIGRATION DIAGNOSTICS ===");
+    Console.WriteLine($"Database provider: {context.Database.ProviderName}");
+
+    var allMigrations = Array.Empty<string>();
+    var appliedMigrations = Array.Empty<string>();
+    var pendingMigrations = Array.Empty<string>();
+
+    const int maxRetries = 3;
+    var baseDelay = TimeSpan.FromSeconds(1);
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            Console.WriteLine($"Attempting database connection for diagnostics (attempt {attempt}/{maxRetries})");
+
+            // Test basic connectivity first
+            if (!await TestDatabaseConnectivityAsync(context))
+            {
+                throw new InvalidOperationException("Database connectivity test failed");
+            }
+
+            // Get migration information
+            allMigrations = context.Database.GetMigrations().ToArray();
+            appliedMigrations = context.Database.GetAppliedMigrations().ToArray();
+            pendingMigrations = context.Database.GetPendingMigrations().ToArray();
+
+            Console.WriteLine($"Migrations in assembly: {string.Join(',', allMigrations)}");
+            Console.WriteLine($"Applied on DB: {string.Join(',', appliedMigrations)}");
+            Console.WriteLine($"Pending on DB: {string.Join(',', pendingMigrations)}");
+            Console.WriteLine($"Skip migrations flag: {skipMigrations}");
+
+            // Check for specific PgProviderSync migration status
+            var pgProviderSyncMigration = "20250926000329_PgProviderSync";
+            var isPgSyncApplied = appliedMigrations.Contains(pgProviderSyncMigration);
+            var isPgSyncPending = pendingMigrations.Contains(pgProviderSyncMigration);
+            Console.WriteLine($"PgProviderSync status: Applied={isPgSyncApplied}, Pending={isPgSyncPending}");
+
+            break; // Success, exit retry loop
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database diagnostics attempt {attempt} failed: {ex.Message}");
+
+            if (attempt == maxRetries)
+            {
+                Console.WriteLine($"⚠️  WARNING: Could not retrieve migration diagnostics after {maxRetries} attempts");
+                Console.WriteLine($"⚠️  Service will continue but database operations may fail");
+                Console.WriteLine($"⚠️  Error: {ex.Message}");
+
+                // Return empty arrays so the app can still start
+                return Array.Empty<string>();
+            }
+
+            var delay = TimeSpan.FromMilliseconds(baseDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+            Console.WriteLine($"Retrying diagnostics in {delay.TotalSeconds} seconds...");
+            await Task.Delay(delay);
+        }
+    }
+
+    return pendingMigrations;
+}
+
+// Helper function to test database connectivity with detailed error handling
+static async Task<bool> TestDatabaseConnectivityAsync(BoonBuilderContext context)
+{
+    try
+    {
+        var canConnect = await context.Database.CanConnectAsync();
+        Console.WriteLine($"Database connectivity test: {(canConnect ? "SUCCESS" : "FAILED")}");
+
+        if (canConnect && context.Database.ProviderName?.Contains("Npgsql") == true)
+        {
+            Console.WriteLine($"PostgreSQL connection established successfully");
+
+            try
+            {
+                using var command = context.Database.GetDbConnection().CreateCommand();
+                command.CommandText = "SELECT version()";
+                if (context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+                {
+                    await context.Database.OpenConnectionAsync();
+                }
+                var dbVersion = (await command.ExecuteScalarAsync())?.ToString();
+                if (!string.IsNullOrEmpty(dbVersion))
+                {
+                    Console.WriteLine($"PostgreSQL version: {dbVersion.Substring(0, Math.Min(50, dbVersion.Length))}...");
+                }
+                await context.Database.CloseConnectionAsync();
+            }
+            catch (Exception versionEx)
+            {
+                Console.WriteLine($"Could not retrieve PostgreSQL version: {versionEx.Message}");
+            }
+        }
+
+        return canConnect;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database connectivity test FAILED: {ex.Message}");
+        return false;
+    }
+}
+
 // Helper function for resilient database migration execution
 static async Task RunMigrationsWithRetryAsync(BoonBuilderContext context)
 {
@@ -49,7 +157,22 @@ static string ConvertPostgresUrlToConnectionString(string databaseUrl)
         var uri = new Uri(databaseUrl);
         var userInfo = uri.UserInfo.Split(':');
 
-        return $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};";
+        // Build connection string with Railway-optimized parameters
+        var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};";
+
+        // Add Railway-specific connection parameters for better reliability
+        connectionString += "Pooling=true;";
+        connectionString += "MinPoolSize=1;";
+        connectionString += "MaxPoolSize=20;";
+        connectionString += "ConnectionIdleLifetime=300;";
+        connectionString += "ConnectionPruningInterval=10;";
+        connectionString += "CommandTimeout=30;";
+        connectionString += "Timeout=30;";
+        connectionString += "Keepalive=30;";
+        connectionString += "TcpKeepAliveTime=600;";
+        connectionString += "TcpKeepAliveInterval=30;";
+
+        return connectionString;
     }
     catch (Exception ex)
     {
@@ -171,61 +294,8 @@ using (var scope = app.Services.CreateScope())
     // Check for optional migration skip during debugging
     var skipMigrations = (Environment.GetEnvironmentVariable("SKIP_MIGRATIONS") ?? "false").ToLower() == "true";
 
-    // Debug: list migrations present in the assembly and DB
-    var allMigrations = context.Database.GetMigrations().ToArray();
-    var appliedMigrations = context.Database.GetAppliedMigrations().ToArray();
-    var pendingMigrations = context.Database.GetPendingMigrations().ToArray();
-
-    Console.WriteLine($"=== MIGRATION DIAGNOSTICS ===");
-    Console.WriteLine($"Database provider: {context.Database.ProviderName}");
-    Console.WriteLine($"Migrations in assembly: {string.Join(',', allMigrations)}");
-    Console.WriteLine($"Applied on DB: {string.Join(',', appliedMigrations)}");
-    Console.WriteLine($"Pending on DB: {string.Join(',', pendingMigrations)}");
-    Console.WriteLine($"Skip migrations flag: {skipMigrations}");
-
-    // Check for specific PgProviderSync migration status
-    var pgProviderSyncMigration = "20250926000329_PgProviderSync";
-    var isPgSyncApplied = appliedMigrations.Contains(pgProviderSyncMigration);
-    var isPgSyncPending = pendingMigrations.Contains(pgProviderSyncMigration);
-    Console.WriteLine($"PgProviderSync status: Applied={isPgSyncApplied}, Pending={isPgSyncPending}");
-
-    // Test database connectivity
-    try
-    {
-        var canConnect = context.Database.CanConnect();
-        Console.WriteLine($"Database connectivity test: {(canConnect ? "SUCCESS" : "FAILED")}");
-
-        if (canConnect && context.Database.ProviderName?.Contains("Npgsql") == true)
-        {
-            // For PostgreSQL, confirm connection is working
-            Console.WriteLine($"PostgreSQL connection established successfully");
-
-            // Optional: Try to get version info with proper error handling
-            try
-            {
-                using var command = context.Database.GetDbConnection().CreateCommand();
-                command.CommandText = "SELECT version()";
-                if (context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
-                {
-                    await context.Database.OpenConnectionAsync();
-                }
-                var dbVersion = (await command.ExecuteScalarAsync())?.ToString();
-                if (!string.IsNullOrEmpty(dbVersion))
-                {
-                    Console.WriteLine($"PostgreSQL version: {dbVersion.Substring(0, Math.Min(50, dbVersion.Length))}...");
-                }
-                await context.Database.CloseConnectionAsync();
-            }
-            catch (Exception versionEx)
-            {
-                Console.WriteLine($"Could not retrieve PostgreSQL version: {versionEx.Message}");
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Database connectivity test FAILED: {ex.Message}");
-    }
+    // Perform database diagnostics with retry logic and error handling
+    var pendingMigrations = await PerformDatabaseDiagnosticsAsync(context, skipMigrations);
 
     Console.WriteLine($"==============================");
 
