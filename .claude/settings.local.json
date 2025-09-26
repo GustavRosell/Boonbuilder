@@ -32,7 +32,8 @@
       "Bash(railway login:*)",
       "Bash(git push:*)",
       "Bash(railway link:*)",
-      "Bash(docker run:*)"
+      "Bash(docker run:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

@@ -77,13 +77,31 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 100);
 
+            // Safe conversion for WeaponAspects.IsHidden (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsHidden_temp",
+                table: "WeaponAspects",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"WeaponAspects\" SET \"IsHidden_temp\" = CASE WHEN \"IsHidden\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsHidden",
+                table: "WeaponAspects");
+
+            migrationBuilder.RenameColumn(
+                name: "IsHidden_temp",
+                table: "WeaponAspects",
+                newName: "IsHidden");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "IsHidden",
                 table: "WeaponAspects",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "IconUrl",
@@ -224,13 +242,31 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 100);
 
+            // Safe conversion for Familiars.IsHidden (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsHidden_temp",
+                table: "Familiars",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"Familiars\" SET \"IsHidden_temp\" = CASE WHEN \"IsHidden\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsHidden",
+                table: "Familiars");
+
+            migrationBuilder.RenameColumn(
+                name: "IsHidden_temp",
+                table: "Familiars",
+                newName: "IsHidden");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "IsHidden",
                 table: "Familiars",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "IconUrl",
@@ -313,21 +349,57 @@ namespace BoonBuilder.API.Migrations
                 oldClrType: typeof(int),
                 oldType: "INTEGER");
 
+            // Safe conversion for Builds.IsPublic (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsPublic_temp",
+                table: "Builds",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"Builds\" SET \"IsPublic_temp\" = CASE WHEN \"IsPublic\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsPublic",
+                table: "Builds");
+
+            migrationBuilder.RenameColumn(
+                name: "IsPublic_temp",
+                table: "Builds",
+                newName: "IsPublic");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "IsPublic",
                 table: "Builds",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
+
+            // Safe conversion for Builds.IsFeatured (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsFeatured_temp",
+                table: "Builds",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"Builds\" SET \"IsFeatured_temp\" = CASE WHEN \"IsFeatured\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsFeatured",
+                table: "Builds");
+
+            migrationBuilder.RenameColumn(
+                name: "IsFeatured_temp",
+                table: "Builds",
+                newName: "IsFeatured");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsFeatured",
                 table: "Builds",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<int>(
                 name: "FamiliarId",
@@ -469,13 +541,31 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldMaxLength: 100);
 
+            // Safe conversion for Boons.IsPassive (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsPassive_temp",
+                table: "Boons",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"Boons\" SET \"IsPassive_temp\" = CASE WHEN \"IsPassive\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsPassive",
+                table: "Boons");
+
+            migrationBuilder.RenameColumn(
+                name: "IsPassive_temp",
+                table: "Boons",
+                newName: "IsPassive");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "IsPassive",
                 table: "Boons",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "IconUrl",
@@ -602,13 +692,31 @@ namespace BoonBuilder.API.Migrations
                 oldClrType: typeof(int),
                 oldType: "INTEGER");
 
+            // Safe conversion for BoonPrerequisites.IsAlternative (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "IsAlternative_temp",
+                table: "BoonPrerequisites",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"BoonPrerequisites\" SET \"IsAlternative_temp\" = CASE WHEN \"IsAlternative\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "IsAlternative",
+                table: "BoonPrerequisites");
+
+            migrationBuilder.RenameColumn(
+                name: "IsAlternative_temp",
+                table: "BoonPrerequisites",
+                newName: "IsAlternative");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "IsAlternative",
                 table: "BoonPrerequisites",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<int>(
                 name: "BoonId",
@@ -679,13 +787,31 @@ namespace BoonBuilder.API.Migrations
                 oldMaxLength: 256,
                 oldNullable: true);
 
+            // Safe conversion for AspNetUsers.TwoFactorEnabled (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "TwoFactorEnabled_temp",
+                table: "AspNetUsers",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"AspNetUsers\" SET \"TwoFactorEnabled_temp\" = CASE WHEN \"TwoFactorEnabled\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "TwoFactorEnabled",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "TwoFactorEnabled_temp",
+                table: "AspNetUsers",
+                newName: "TwoFactorEnabled");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "TwoFactorEnabled",
                 table: "AspNetUsers",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "SecurityStamp",
@@ -696,13 +822,31 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldNullable: true);
 
+            // Safe conversion for AspNetUsers.PhoneNumberConfirmed (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "PhoneNumberConfirmed_temp",
+                table: "AspNetUsers",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"AspNetUsers\" SET \"PhoneNumberConfirmed_temp\" = CASE WHEN \"PhoneNumberConfirmed\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "PhoneNumberConfirmed",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "PhoneNumberConfirmed_temp",
+                table: "AspNetUsers",
+                newName: "PhoneNumberConfirmed");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "PhoneNumberConfirmed",
                 table: "AspNetUsers",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "PhoneNumber",
@@ -753,21 +897,57 @@ namespace BoonBuilder.API.Migrations
                 oldType: "TEXT",
                 oldNullable: true);
 
+            // Safe conversion for AspNetUsers.LockoutEnabled (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "LockoutEnabled_temp",
+                table: "AspNetUsers",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"AspNetUsers\" SET \"LockoutEnabled_temp\" = CASE WHEN \"LockoutEnabled\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "LockoutEnabled",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "LockoutEnabled_temp",
+                table: "AspNetUsers",
+                newName: "LockoutEnabled");
+
             migrationBuilder.AlterColumn<bool>(
                 name: "LockoutEnabled",
                 table: "AspNetUsers",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
+
+            // Safe conversion for AspNetUsers.EmailConfirmed (INTEGER -> boolean)
+            migrationBuilder.AddColumn<bool>(
+                name: "EmailConfirmed_temp",
+                table: "AspNetUsers",
+                type: "boolean",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                "UPDATE \"AspNetUsers\" SET \"EmailConfirmed_temp\" = CASE WHEN \"EmailConfirmed\" = 1 THEN true ELSE false END;");
+
+            migrationBuilder.DropColumn(
+                name: "EmailConfirmed",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "EmailConfirmed_temp",
+                table: "AspNetUsers",
+                newName: "EmailConfirmed");
 
             migrationBuilder.AlterColumn<bool>(
                 name: "EmailConfirmed",
                 table: "AspNetUsers",
                 type: "boolean",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                defaultValue: false);
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
