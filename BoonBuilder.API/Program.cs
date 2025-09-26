@@ -177,10 +177,36 @@ using (var scope = app.Services.CreateScope())
     var pendingMigrations = context.Database.GetPendingMigrations().ToArray();
 
     Console.WriteLine($"=== MIGRATION DIAGNOSTICS ===");
+    Console.WriteLine($"Database provider: {context.Database.ProviderName}");
     Console.WriteLine($"Migrations in assembly: {string.Join(',', allMigrations)}");
     Console.WriteLine($"Applied on DB: {string.Join(',', appliedMigrations)}");
     Console.WriteLine($"Pending on DB: {string.Join(',', pendingMigrations)}");
     Console.WriteLine($"Skip migrations flag: {skipMigrations}");
+
+    // Check for specific PgProviderSync migration status
+    var pgProviderSyncMigration = "20250926000329_PgProviderSync";
+    var isPgSyncApplied = appliedMigrations.Contains(pgProviderSyncMigration);
+    var isPgSyncPending = pendingMigrations.Contains(pgProviderSyncMigration);
+    Console.WriteLine($"PgProviderSync status: Applied={isPgSyncApplied}, Pending={isPgSyncPending}");
+
+    // Test database connectivity
+    try
+    {
+        var canConnect = context.Database.CanConnect();
+        Console.WriteLine($"Database connectivity test: {(canConnect ? "SUCCESS" : "FAILED")}");
+
+        if (canConnect && context.Database.ProviderName?.Contains("Npgsql") == true)
+        {
+            // For PostgreSQL, test a simple query
+            var dbVersion = context.Database.ExecuteScalarAsync<string>("SELECT version()").GetAwaiter().GetResult();
+            Console.WriteLine($"PostgreSQL version: {dbVersion?.Substring(0, Math.Min(50, dbVersion.Length ?? 0))}...");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database connectivity test FAILED: {ex.Message}");
+    }
+
     Console.WriteLine($"==============================");
 
     if (!skipMigrations)
@@ -191,6 +217,18 @@ using (var scope = app.Services.CreateScope())
     else
     {
         Console.WriteLine("SKIP_MIGRATIONS=true; skipping automatic migrations at startup.");
+
+        // Warn if there are pending migrations when skip is enabled
+        if (pendingMigrations.Length > 0)
+        {
+            Console.WriteLine("⚠️  WARNING: SKIP_MIGRATIONS is enabled but there are pending migrations!");
+            Console.WriteLine($"⚠️  Pending migrations: {string.Join(", ", pendingMigrations)}");
+            Console.WriteLine("⚠️  This may cause runtime errors due to schema drift.");
+            Console.WriteLine("⚠️  Consider applying migrations manually or setting SKIP_MIGRATIONS=false");
+
+            // In production, you may want to fail fast here:
+            // throw new InvalidOperationException("Pending migrations detected with SKIP_MIGRATIONS=true");
+        }
     }
 
     // Seed data
