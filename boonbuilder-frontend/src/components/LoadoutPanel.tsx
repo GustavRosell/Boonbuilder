@@ -1,7 +1,8 @@
 import React from 'react';
-import { X } from 'lucide-react';
 import LoadoutSlot from './LoadoutSlot';
-import { BoonSlot, BuildState } from '../types';
+import ImageWithFallback from './ImageWithFallback';
+import { BoonSlot, BuildState, Boon, AvailableBoon } from '../types';
+import { isBoonAlreadySelected } from '../utils/boonPrerequisites';
 
 interface LoadoutPanelProps {
   selectedBuild: BuildState;
@@ -13,6 +14,14 @@ interface LoadoutPanelProps {
   onRemoveNonCoreBoon: (boonId: number) => void;
   onBuildNameChange: (name: string) => void;
   onBuildDescriptionChange: (description: string) => void;
+
+  // NEW props to display the pool and special boons like ingame
+  boons: Boon[]; // full boon list pulled by parent (BoonBuilder)
+  availableDuoBoons: AvailableBoon[]; // computed availability (available + locked)
+  availableLegendaryBoons: AvailableBoon[];
+  onSelectBoon: (boon: Boon, slot: BoonSlot) => void;
+  onSelectDuoBoon: (boon: AvailableBoon) => void;
+  onSelectLegendaryBoon: (boon: AvailableBoon) => void;
 }
 
 const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
@@ -24,240 +33,180 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
   onRemoveLegendaryBoon,
   onRemoveNonCoreBoon,
   onBuildNameChange,
-  onBuildDescriptionChange
+  onBuildDescriptionChange,
+
+  // NEW
+  boons,
+  availableDuoBoons,
+  availableLegendaryBoons,
+  onSelectBoon,
+  onSelectDuoBoon,
+  onSelectLegendaryBoon
 }) => {
-  // Ordered slots as specified: Weapon → Familiar → Attack → Special → Cast → Sprint → Magicka
-  const orderedSlots = [
-    {
-      slotType: 'weapon' as const,
-      slotName: 'Weapon',
-      selectedItem: selectedBuild.weapon,
-      selectedAspect: selectedBuild.aspect,
-      onRemove: selectedBuild.weapon ? onRemoveWeapon : undefined,
-      emptyIcon: '/images/slots/weapon.png',
-      emptyLabel: 'No Weapon'
-    },
-    {
-      slotType: 'familiar' as const,
-      slotName: 'Familiar',
-      selectedItem: selectedBuild.familiar,
-      onRemove: selectedBuild.familiar ? onRemoveFamiliar : undefined,
-      emptyIcon: '/images/slots/familiar.png',
-      emptyLabel: 'No Familiar'
-    },
-    {
-      slotType: 'boon' as const,
-      slotName: 'Attack',
-      boonSlot: BoonSlot.Attack,
-      selectedItem: selectedBuild.boons.get(BoonSlot.Attack),
-      onRemove: selectedBuild.boons.has(BoonSlot.Attack) ? () => onRemoveBoon(BoonSlot.Attack) : undefined,
-      emptyIcon: '/images/slots/attack.png',
-      emptyLabel: 'Empty Slot'
-    },
-    {
-      slotType: 'boon' as const,
-      slotName: 'Special',
-      boonSlot: BoonSlot.Special,
-      selectedItem: selectedBuild.boons.get(BoonSlot.Special),
-      onRemove: selectedBuild.boons.has(BoonSlot.Special) ? () => onRemoveBoon(BoonSlot.Special) : undefined,
-      emptyIcon: '/images/slots/special.png',
-      emptyLabel: 'Empty Slot'
-    },
-    {
-      slotType: 'boon' as const,
-      slotName: 'Cast',
-      boonSlot: BoonSlot.Cast,
-      selectedItem: selectedBuild.boons.get(BoonSlot.Cast),
-      onRemove: selectedBuild.boons.has(BoonSlot.Cast) ? () => onRemoveBoon(BoonSlot.Cast) : undefined,
-      emptyIcon: '/images/slots/cast.png',
-      emptyLabel: 'Empty Slot'
-    },
-    {
-      slotType: 'boon' as const,
-      slotName: 'Sprint',
-      boonSlot: BoonSlot.Sprint,
-      selectedItem: selectedBuild.boons.get(BoonSlot.Sprint),
-      onRemove: selectedBuild.boons.has(BoonSlot.Sprint) ? () => onRemoveBoon(BoonSlot.Sprint) : undefined,
-      emptyIcon: '/images/slots/sprint.png',
-      emptyLabel: 'Empty Slot'
-    },
-    {
-      slotType: 'boon' as const,
-      slotName: 'Magicka',
-      boonSlot: BoonSlot.Magick,
-      selectedItem: selectedBuild.boons.get(BoonSlot.Magick),
-      onRemove: selectedBuild.boons.has(BoonSlot.Magick) ? () => onRemoveBoon(BoonSlot.Magick) : undefined,
-      emptyIcon: '/images/slots/magicka.png',
-      emptyLabel: 'Empty Slot'
-    }
-  ];
+  // Pool: all boons that are not selected (core + non-core) — this fills the empty area
+  const poolBoons = boons.filter(b => !isBoonAlreadySelected(b.boonId, selectedBuild.boons, selectedBuild.duoBoons, selectedBuild.legendaryBoons));
 
   return (
-    <div className="w-[640px] bg-gray-900/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 h-full flex flex-col">
-      <h2 className="text-2xl font-bold text-purple-300 mb-6 text-center">Loadout</h2>
+    <div className="w-[900px] bg-gray-900/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-6 h-full flex flex-col">
+      <h2 className="text-2xl font-bold text-purple-300 mb-4 text-center">Loadout — Game Board</h2>
 
       <div className="flex gap-6 flex-1 overflow-hidden">
-        {/* Left Column - Main Loadout Slots */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-purple-300 mb-4">Main Loadout</h3>
-          <div className="space-y-3 overflow-y-auto h-full">
-            {orderedSlots.map((slot, index) => (
-              <LoadoutSlot
-                key={`${slot.slotType}-${slot.slotName}-${index}`}
-                slotType={slot.slotType}
-                slotName={slot.slotName}
-                boonSlot={slot.boonSlot}
-                selectedItem={slot.selectedItem}
-                selectedAspect={slot.selectedAspect}
-                onRemove={slot.onRemove}
-                emptyIcon={slot.emptyIcon}
-                emptyLabel={slot.emptyLabel}
-              />
-            ))}
+        {/* LEFT: GAME BOARD (weapon + core slots) */}
+        <div className="w-[320px] flex flex-col items-center gap-6">
+          {/* Weapon */}
+          <LoadoutSlot
+            slotType="weapon"
+            slotName="Weapon"
+            selectedItem={selectedBuild.weapon}
+            selectedAspect={selectedBuild.aspect}
+            onRemove={selectedBuild.weapon ? onRemoveWeapon : undefined}
+            emptyIcon="/images/slots/weapon.png"
+            emptyLabel="No Weapon"
+            variant="large"
+          />
+
+          {/* Familiar */}
+          <LoadoutSlot
+            slotType="familiar"
+            slotName="Familiar"
+            selectedItem={selectedBuild.familiar}
+            onRemove={selectedBuild.familiar ? onRemoveFamiliar : undefined}
+            emptyIcon="/images/slots/familiar.png"
+            emptyLabel="No Familiar"
+            variant="large"
+          />
+
+          {/* Core slots vertically stacked (game-like) */}
+          <div className="w-full bg-gray-800/20 rounded-lg p-4 flex flex-col items-center gap-3">
+            <div className="text-sm text-gray-400 mb-1">Core Boons</div>
+            <div className="flex flex-col gap-3 w-full">
+              {[
+                { slot: BoonSlot.Attack, label: 'Attack' },
+                { slot: BoonSlot.Special, label: 'Special' },
+                { slot: BoonSlot.Cast, label: 'Cast' },
+                { slot: BoonSlot.Sprint, label: 'Sprint' },
+                { slot: BoonSlot.Magick, label: 'Magicka' }
+              ].map(s => (
+                <LoadoutSlot
+                  key={s.slot}
+                  slotType="boon"
+                  slotName={s.label}
+                  boonSlot={s.slot}
+                  selectedItem={selectedBuild.boons.get(s.slot)}
+                  onRemove={selectedBuild.boons.has(s.slot) ? () => onRemoveBoon(s.slot) : undefined}
+                  emptyIcon={`/images/slots/${s.label.toLowerCase()}.png`}
+                  emptyLabel="Empty Slot"
+                  variant="large"
+                />
+              ))}
+            </div>
+            <div className="text-xs text-gray-400 mt-2">Empty slot templates show available pool on the right.</div>
+          </div>
+
+          {/* Selected Duo / Legendary quick view (compact) */}
+          <div className="w-full space-y-2">
+            <div className="text-sm text-yellow-300 font-semibold">Duo / Legendary (Quick view)</div>
+            <div className="flex gap-2 flex-wrap">
+              {selectedBuild.duoBoons.map(d => (
+                <div key={d.boonId} className="w-10 h-10 rounded-lg bg-yellow-900/20 border border-yellow-500/30 flex items-center justify-center">
+                  <ImageWithFallback src={d.iconUrl} alt={d.name} className="w-8 h-8 rounded object-cover" fallbackIcon="🤝" />
+                </div>
+              ))}
+              {selectedBuild.legendaryBoons.map(l => (
+                <div key={l.boonId} className="w-10 h-10 rounded-lg bg-orange-900/20 border border-orange-500/30 flex items-center justify-center">
+                  <ImageWithFallback src={l.iconUrl} alt={l.name} className="w-8 h-8 rounded object-cover" fallbackIcon="⭐" />
+                </div>
+              ))}
+              {(selectedBuild.duoBoons.length === 0 && selectedBuild.legendaryBoons.length === 0) && (
+                <div className="text-xs text-gray-400">No special boons selected</div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right Column - Special Boons & Additional Info */}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-purple-300 mb-4">Special Boons</h3>
-          <div className="overflow-y-auto h-full space-y-6">
-
-            {/* Duo Boons Section */}
-            <div className="bg-gray-800/30 rounded-lg p-4">
-              <h4 className="text-base font-semibold text-yellow-300 mb-3 flex items-center">
-                <span className="text-lg mr-2">🤝</span>
-                Duo Boons {selectedBuild.duoBoons.length > 0 && `(${selectedBuild.duoBoons.length})`}
-              </h4>
-              {selectedBuild.duoBoons.length > 0 ? (
-                <div className="space-y-3">
-                  {selectedBuild.duoBoons.map((duoBoon) => (
-                    <div key={duoBoon.boonId} className="flex items-center space-x-3 p-3 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-600/40 to-orange-600/40 border-2 border-yellow-400/60 flex items-center justify-center flex-shrink-0">
-                        <img
-                          src={duoBoon.iconUrl}
-                          alt={duoBoon.name}
-                          className="w-8 h-8 rounded object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-white font-medium text-sm truncate">{duoBoon.name}</div>
-                        <div className="text-xs text-yellow-300">
-                          {duoBoon.firstGod?.name} + {duoBoon.secondGod?.name}
-                        </div>
-                        {duoBoon.description && (
-                          <div className="text-xs text-gray-300 mt-1 line-clamp-2">{duoBoon.description}</div>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        {!duoBoon.isAvailable && (
-                          <span className="text-[10px] uppercase tracking-wide bg-gray-800 text-yellow-300 px-2 py-0.5 rounded border border-yellow-500/30">
-                            Locked
-                          </span>
-                        )}
-                        <button
-                          onClick={() => onRemoveDuoBoon(duoBoon.boonId)}
-                          className="text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/30"
-                          title="Remove Duo Boon"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">No duo boons selected</p>
-              )}
+        {/* CENTER / RIGHT: POOL & SPECIAL BOONS */}
+        <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+          {/* Available/Pool boons — grid of all non-selected boons (click to assign) */}
+          <div className="bg-gray-800/30 rounded-lg p-4 flex-1 overflow-auto">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-purple-200">Available Boons</h3>
+              <div className="text-sm text-gray-400">Click a boon to place it (core boons will auto-fill their slot)</div>
             </div>
 
-            {/* Legendary Boons Section */}
-            <div className="bg-gray-800/30 rounded-lg p-4">
-              <h4 className="text-base font-semibold text-orange-300 mb-3 flex items-center">
-                <span className="text-lg mr-2">⭐</span>
-                Legendary Boons {selectedBuild.legendaryBoons.length > 0 && `(${selectedBuild.legendaryBoons.length})`}
-              </h4>
-              {selectedBuild.legendaryBoons.length > 0 ? (
-                <div className="space-y-3">
-                  {selectedBuild.legendaryBoons.map((legendaryBoon) => (
-                    <div key={legendaryBoon.boonId} className="flex items-center space-x-3 p-3 bg-orange-900/20 rounded-lg border border-orange-500/30">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-600/40 to-red-600/40 border-2 border-orange-400/60 flex items-center justify-center flex-shrink-0">
-                        <img
-                          src={legendaryBoon.iconUrl}
-                          alt={legendaryBoon.name}
-                          className="w-8 h-8 rounded object-cover"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-white font-medium text-sm truncate">{legendaryBoon.name}</div>
-                        <div className="text-xs text-orange-300">{legendaryBoon.god?.name}</div>
-                        {legendaryBoon.description && (
-                          <div className="text-xs text-gray-300 mt-1 line-clamp-2">{legendaryBoon.description}</div>
-                        )}
-                      </div>
-                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        {!legendaryBoon.isAvailable && (
-                          <span className="text-[10px] uppercase tracking-wide bg-gray-800 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30">
-                            Locked
-                          </span>
-                        )}
-                        <button
-                          onClick={() => onRemoveLegendaryBoon(legendaryBoon.boonId)}
-                          className="text-red-400 hover:text-red-300 transition-colors p-1 rounded hover:bg-red-900/30"
-                          title="Remove Legendary Boon"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
+            <div className="grid grid-cols-6 gap-2">
+              {poolBoons.map((boon) => (
+                <button
+                  key={boon.boonId}
+                  onClick={() => boon.slot && onSelectBoon(boon, boon.slot)}
+                  className={`group relative p-2 rounded-lg flex flex-col items-center justify-center
+                    ${boon.type === 0 ? 'border border-purple-600/30 bg-gradient-to-br from-purple-900/6 to-blue-900/6' : 'bg-gray-900/20 border border-gray-700/40'}
+                    hover:scale-105 transition-transform`}
+                  title={`${boon.name} — ${boon.god?.name || ''}`}
+                >
+                  <ImageWithFallback src={boon.iconUrl} alt={boon.name} className="w-10 h-10 rounded object-cover" fallbackIcon={boon.name.charAt(0)} />
+                  <div className="text-xs text-gray-300 mt-1 truncate w-full text-center">{boon.name}</div>
+                  {boon.type === 0 && (
+                    <div className="absolute -top-2 left-2 text-[10px] bg-gray-800 px-1 rounded text-purple-300 border border-purple-500/20">
+                      CORE
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">No legendary boons selected</p>
-              )}
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Duo & Legendary grids (compact cards with locked state) */}
+          <div className="flex gap-3">
+            <div className="flex-1 bg-yellow-900/10 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-yellow-300 font-semibold">Duo Boons</h4>
+                <div className="text-sm text-gray-400">{availableDuoBoons.length}</div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {availableDuoBoons.map(d => (
+                  <button
+                    key={d.boonId}
+                    onClick={() => d.isAvailable && onSelectDuoBoon(d)}
+                    className={`p-2 rounded-lg flex items-center gap-2 border ${
+                      d.isAvailable ? 'border-yellow-400 bg-yellow-900/20 shadow-sm' : 'border-gray-700 bg-gray-800/20 opacity-50'
+                    }`}
+                    title={d.name}
+                  >
+                    <ImageWithFallback src={d.iconUrl} alt={d.name} className="w-8 h-8 rounded object-cover" fallbackIcon="🤝" />
+                    <div className="text-xs text-white truncate">{d.name}</div>
+                    {!d.isAvailable && <div className="ml-auto text-[10px] text-yellow-300 px-1">Locked</div>}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Non-Core Boons Section */}
-            <div className="bg-gray-800/30 rounded-lg p-4">
-              <h4 className="text-base font-semibold text-cyan-300 mb-3 flex items-center">
-                <span className="text-lg mr-2">🌟</span>
-                Non-Core Boons
-              </h4>
-              {selectedBuild.nonCoreBoons.length > 0 ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {selectedBuild.nonCoreBoons.map((boon) => (
-                    <div key={boon.boonId} className="relative group">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-600/40 to-blue-600/40 border-2 border-cyan-400/60 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
-                        <img
-                          src={boon.iconUrl}
-                          alt={boon.name}
-                          className="w-8 h-8 rounded object-cover"
-                        />
-                        <button
-                          onClick={() => onRemoveNonCoreBoon(boon.boonId)}
-                          className="absolute -top-1 -right-1 text-red-400 hover:text-red-300 transition-colors p-1 rounded-full bg-gray-900 opacity-0 group-hover:opacity-100"
-                          title="Remove Non-Core Boon"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        {boon.name}
-                        <div className="text-cyan-300">{boon.god?.name}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">No non-core boons selected (Infusion, Hex, Chaos)</p>
-              )}
+            <div className="flex-1 bg-orange-900/10 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-orange-300 font-semibold">Legendary Boons</h4>
+                <div className="text-sm text-gray-400">{availableLegendaryBoons.length}</div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {availableLegendaryBoons.map(l => (
+                  <button
+                    key={l.boonId}
+                    onClick={() => l.isAvailable && onSelectLegendaryBoon(l)}
+                    className={`p-2 rounded-lg flex items-center gap-2 border ${
+                      l.isAvailable ? 'border-orange-400 bg-orange-900/20 shadow-sm' : 'border-gray-700 bg-gray-800/20 opacity-50'
+                    }`}
+                    title={l.name}
+                  >
+                    <ImageWithFallback src={l.iconUrl} alt={l.name} className="w-8 h-8 rounded object-cover" fallbackIcon="⭐" />
+                    <div className="text-xs text-white truncate">{l.name}</div>
+                    {!l.isAvailable && <div className="ml-auto text-[10px] text-orange-300 px-1">Locked</div>}
+                  </button>
+                ))}
+              </div>
             </div>
-
           </div>
         </div>
       </div>
 
-      {/* Build Details Section - Full Width */}
+      {/* Build Details Section - Full Width (unchanged) */}
       <div className="pt-4 border-t border-gray-700">
         <h3 className="text-lg font-semibold text-purple-300 mb-3">Build Details</h3>
         <div className="grid grid-cols-2 gap-4">

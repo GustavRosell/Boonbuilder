@@ -33,7 +33,15 @@
       "Bash(git push:*)",
       "Bash(railway link:*)",
       "Bash(docker run:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(del \"Migrations\\20250926000329_PgProviderSync.cs\")",
+      "Bash(del \"Migrations\\20250926000329_PgProviderSync.Designer.cs\")",
+      "Bash(PORT=3001 npm start)",
+      "Bash(cat:*)",
+      "Bash(for god in aphrodite apollo demeter hephaestus hera hestia poseidon zeus)",
+      "Bash(do echo \"=== $god ===\")",
+      "Bash(ls:*)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

@@ -25,9 +25,16 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   }, [src]);
 
   const handleImageError = () => {
-    // Try fallback from .webp to .svg if available
+    // Try fallback chain: .webp → .png → .svg
     if (currentSrc.endsWith('.webp')) {
-      const svgFallback = currentSrc.replace('.webp', '.svg');
+      const pngFallback = currentSrc.replace('.webp', '.png');
+      setCurrentSrc(pngFallback);
+      setIsLoading(true);
+      return;
+    }
+
+    if (currentSrc.endsWith('.png')) {
+      const svgFallback = currentSrc.replace('.png', '.svg');
       setCurrentSrc(svgFallback);
       setIsLoading(true);
       return;

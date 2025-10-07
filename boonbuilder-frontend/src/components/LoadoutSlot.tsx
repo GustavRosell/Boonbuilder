@@ -12,6 +12,7 @@ interface LoadoutSlotProps {
   onRemove?: () => void;
   emptyIcon: string; // Path to the empty slot template image
   emptyLabel: string;
+  variant?: 'default' | 'large'; // NEW: allows larger slot for game-board
 }
 
 const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
@@ -21,7 +22,8 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
   selectedAspect,
   onRemove,
   emptyIcon,
-  emptyLabel
+  emptyLabel,
+  variant = 'default' // NEW default
 }) => {
   const isEmpty = !selectedItem;
 
@@ -50,6 +52,10 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
     return selectedItem.description.substring(0, 40) + '...';
   };
 
+  // Size classes depending on variant
+  const containerSizeClass = variant === 'large' ? 'w-16 h-16' : 'w-14 h-14';
+  const imgSizeClass = variant === 'large' ? 'w-12 h-12' : 'w-10 h-10';
+
   return (
     <div className={`
       relative flex items-center p-3 rounded-lg transition-all duration-300
@@ -61,7 +67,7 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
     `}>
       {/* Slot Icon Container - Game-style rounded square */}
       <div className={`
-        relative w-14 h-14 rounded-lg flex items-center justify-center mr-3
+        relative ${containerSizeClass} rounded-lg flex items-center justify-center mr-3
         ${isEmpty
           ? 'bg-gray-700/50 border-2 border-gray-600/70'
           : 'bg-gradient-to-br from-purple-600/20 to-blue-600/20 border-2 border-purple-400/60'
@@ -72,7 +78,7 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
           src={getItemIcon()}
           alt={getItemName()}
           className={`
-            w-10 h-10 rounded object-cover transition-all duration-300
+            ${imgSizeClass} rounded object-cover transition-all duration-300
             ${isEmpty ? 'opacity-60 grayscale' : 'opacity-100'}
           `}
           fallbackIcon={emptyLabel.charAt(0)}
@@ -80,7 +86,7 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
 
         {/* Glow effect for filled slots */}
         {!isEmpty && (
-          <div className="absolute inset-0 bg-purple-400/20 rounded-lg animate-pulse opacity-50"></div>
+          <div className="absolute inset-0 bg-purple-400/12 rounded-lg animate-pulse opacity-60"></div>
         )}
       </div>
 

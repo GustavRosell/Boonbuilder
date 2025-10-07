@@ -261,6 +261,13 @@ const BoonBuilder: React.FC = () => {
                 onRemoveNonCoreBoon={handleRemoveNonCoreBoon}
                 onBuildNameChange={(name) => setSelectedBuild({ ...selectedBuild, name })}
                 onBuildDescriptionChange={(description) => setSelectedBuild({ ...selectedBuild, description })}
+                // NEW props so LoadoutPanel can show pool & special boons like the game
+                boons={boons}
+                availableDuoBoons={availableDuoBoons}
+                availableLegendaryBoons={availableLegendaryBoons}
+                onSelectBoon={handleSelectBoon}
+                onSelectDuoBoon={handleSelectDuoBoon}
+                onSelectLegendaryBoon={handleSelectLegendaryBoon}
               />
 
               {/* Right side - Radial Menu */}
