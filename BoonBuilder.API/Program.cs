@@ -1,0 +1,328 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using BoonBuilder.Data;
+using BoonBuilder.Models;
+using System.Linq;
+
+// Helper function to safely perform database diagnostics with retry logic
+static async Task<string[]> PerformDatabaseDiagnosticsAsync(BoonBuilderContext context, bool skipMigrations)
+{
+    Console.WriteLine($"=== MIGRATION DIAGNOSTICS ===");
+    Console.WriteLine($"Database provider: {context.Database.ProviderName}");
+
+    var allMigrations = Array.Empty<string>();
+    var appliedMigrations = Array.Empty<string>();
+    var pendingMigrations = Array.Empty<string>();
+
+    const int maxRetries = 3;
+    var baseDelay = TimeSpan.FromSeconds(1);
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            Console.WriteLine($"Attempting database connection for diagnostics (attempt {attempt}/{maxRetries})");
+
+            // Test basic connectivity first
+            if (!await TestDatabaseConnectivityAsync(context))
+            {
+                throw new InvalidOperationException("Database connectivity test failed");
+            }
+
+            // Get migration information
+            allMigrations = context.Database.GetMigrations().ToArray();
+            appliedMigrations = context.Database.GetAppliedMigrations().ToArray();
+            pendingMigrations = context.Database.GetPendingMigrations().ToArray();
+
+            Console.WriteLine($"Migrations in assembly: {string.Join(',', allMigrations)}");
+            Console.WriteLine($"Applied on DB: {string.Join(',', appliedMigrations)}");
+            Console.WriteLine($"Pending on DB: {string.Join(',', pendingMigrations)}");
+            Console.WriteLine($"Skip migrations flag: {skipMigrations}");
+
+            // Check for specific PgProviderSync migration status
+            var pgProviderSyncMigration = "20250926000329_PgProviderSync";
+            var isPgSyncApplied = appliedMigrations.Contains(pgProviderSyncMigration);
+            var isPgSyncPending = pendingMigrations.Contains(pgProviderSyncMigration);
+            Console.WriteLine($"PgProviderSync status: Applied={isPgSyncApplied}, Pending={isPgSyncPending}");
+
+            break; // Success, exit retry loop
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database diagnostics attempt {attempt} failed: {ex.Message}");
+
+            if (attempt == maxRetries)
+            {
+                Console.WriteLine($"⚠️  WARNING: Could not retrieve migration diagnostics after {maxRetries} attempts");
+                Console.WriteLine($"⚠️  Service will continue but database operations may fail");
+                Console.WriteLine($"⚠️  Error: {ex.Message}");
+
+                // Return empty arrays so the app can still start
+                return Array.Empty<string>();
+            }
+
+            var delay = TimeSpan.FromMilliseconds(baseDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+            Console.WriteLine($"Retrying diagnostics in {delay.TotalSeconds} seconds...");
+            await Task.Delay(delay);
+        }
+    }
+
+    return pendingMigrations;
+}
+
+// Helper function to test database connectivity with detailed error handling
+static async Task<bool> TestDatabaseConnectivityAsync(BoonBuilderContext context)
+{
+    try
+    {
+        var canConnect = await context.Database.CanConnectAsync();
+        Console.WriteLine($"Database connectivity test: {(canConnect ? "SUCCESS" : "FAILED")}");
+
+        if (canConnect && context.Database.ProviderName?.Contains("Npgsql") == true)
+        {
+            Console.WriteLine($"PostgreSQL connection established successfully");
+
+            try
+            {
+                using var command = context.Database.GetDbConnection().CreateCommand();
+                command.CommandText = "SELECT version()";
+                if (context.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
+                {
+                    await context.Database.OpenConnectionAsync();
+                }
+                var dbVersion = (await command.ExecuteScalarAsync())?.ToString();
+                if (!string.IsNullOrEmpty(dbVersion))
+                {
+                    Console.WriteLine($"PostgreSQL version: {dbVersion.Substring(0, Math.Min(50, dbVersion.Length))}...");
+                }
+                await context.Database.CloseConnectionAsync();
+            }
+            catch (Exception versionEx)
+            {
+                Console.WriteLine($"Could not retrieve PostgreSQL version: {versionEx.Message}");
+            }
+        }
+
+        return canConnect;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database connectivity test FAILED: {ex.Message}");
+        return false;
+    }
+}
+
+// Helper function for resilient database migration execution
+static async Task RunMigrationsWithRetryAsync(BoonBuilderContext context)
+{
+    const int maxRetries = 5;
+    var baseDelay = TimeSpan.FromSeconds(2);
+
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        try
+        {
+            Console.WriteLine($"Attempting database migration (attempt {attempt}/{maxRetries})");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("Database migration completed successfully");
+            return;
+        }
+        catch (Exception ex)
+        {
+            var isTransientError = ex.Message.Contains("57P03") || // PostgreSQL startup error
+                                   ex.Message.Contains("connection") ||
+                                   ex.Message.Contains("timeout") ||
+                                   ex.Message.Contains("network");
+
+            Console.WriteLine($"Migration attempt {attempt} failed: {ex.Message}");
+
+            if (attempt == maxRetries || !isTransientError)
+            {
+                Console.WriteLine($"Final migration attempt failed. Error: {ex.Message}");
+                throw;
+            }
+
+            var delay = TimeSpan.FromMilliseconds(baseDelay.TotalMilliseconds * Math.Pow(2, attempt - 1));
+            Console.WriteLine($"Retrying migration in {delay.TotalSeconds} seconds...");
+            await Task.Delay(delay);
+        }
+    }
+}
+
+// Helper function to convert PostgreSQL URL to Npgsql connection string
+static string ConvertPostgresUrlToConnectionString(string databaseUrl)
+{
+    try
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+
+        // Build connection string with Railway-optimized parameters
+        var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};";
+
+        // Add Railway-specific connection parameters for better reliability
+        connectionString += "Pooling=true;";
+        connectionString += "MinPoolSize=1;";
+        connectionString += "MaxPoolSize=20;";
+        connectionString += "ConnectionIdleLifetime=300;";
+        connectionString += "ConnectionPruningInterval=10;";
+        connectionString += "CommandTimeout=30;";
+        connectionString += "Timeout=30;";
+        connectionString += "Keepalive=30;";
+        connectionString += "TcpKeepAliveTime=600;";
+        connectionString += "TcpKeepAliveInterval=30;";
+
+        return connectionString;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+        throw;
+    }
+}
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Add CORS for React frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp",
+        policy => policy
+            .WithOrigins(
+                "http://localhost:3000",                    // Local development
+                "https://*.railway.app",                    // Railway deployments
+                Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000"  // Custom domain
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
+
+// Add Entity Framework with SQLite (dev) or PostgreSQL (production)
+builder.Services.AddDbContext<BoonBuilderContext>(options =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+    // Debug logging for Railway deployment
+    Console.WriteLine($"=== DATABASE CONNECTION DEBUG ===");
+    Console.WriteLine($"DefaultConnection: {connectionString ?? "NULL"}");
+    Console.WriteLine($"DATABASE_URL: {databaseUrl ?? "NULL"}");
+    Console.WriteLine($"DATABASE_URL Length: {databaseUrl?.Length ?? 0}");
+    Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+
+    // List all environment variables that contain "DATABASE" or "POSTGRES"
+    Console.WriteLine("=== RELEVANT ENVIRONMENT VARIABLES ===");
+    foreach (System.Collections.DictionaryEntry env in Environment.GetEnvironmentVariables())
+    {
+        var key = env.Key.ToString();
+        if (key?.Contains("DATABASE") == true || key?.Contains("POSTGRES") == true || key?.Contains("DB") == true)
+        {
+            Console.WriteLine($"{key}: {env.Value}");
+        }
+    }
+    Console.WriteLine("=====================================");
+
+    if (!string.IsNullOrEmpty(databaseUrl))
+    {
+        // Railway PostgreSQL connection - convert URL format to Npgsql format
+        Console.WriteLine($"Using PostgreSQL with DATABASE_URL");
+
+        // Parse the PostgreSQL URL and convert to Npgsql connection string format
+        var npgsqlConnectionString = ConvertPostgresUrlToConnectionString(databaseUrl);
+        Console.WriteLine($"Converted connection string: {npgsqlConnectionString}");
+
+        options.UseNpgsql(npgsqlConnectionString);
+    }
+    else if (!string.IsNullOrEmpty(connectionString))
+    {
+        // Local SQLite connection
+        Console.WriteLine($"Using SQLite with DefaultConnection");
+        options.UseSqlite(connectionString);
+    }
+    else
+    {
+        // Fallback to default SQLite
+        Console.WriteLine($"Using fallback SQLite");
+        options.UseSqlite("Data Source=boonbuilder.db");
+    }
+});
+
+// Register services
+builder.Services.AddScoped<BoonBuilder.Services.IBoonService, BoonBuilder.Services.BoonService>();
+builder.Services.AddScoped<BoonBuilder.Services.IBuildService, BoonBuilder.Services.BuildService>();
+
+// Add Identity for authentication (simplified for now)
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Simplified password requirements for development
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireLowercase = true;
+})
+    .AddEntityFrameworkStores<BoonBuilderContext>()
+    .AddDefaultTokenProviders();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseCors("ReactApp");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+// Initialize database and seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<BoonBuilderContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    // Check for optional migration skip during debugging
+    var skipMigrations = (Environment.GetEnvironmentVariable("SKIP_MIGRATIONS") ?? "false").ToLower() == "true";
+
+    // Perform database diagnostics with retry logic and error handling
+    var pendingMigrations = await PerformDatabaseDiagnosticsAsync(context, skipMigrations);
+
+    Console.WriteLine($"==============================");
+
+    if (!skipMigrations)
+    {
+        // Run migrations to create/update database with retry logic for PostgreSQL startup
+        await RunMigrationsWithRetryAsync(context);
+    }
+    else
+    {
+        Console.WriteLine("SKIP_MIGRATIONS=true; skipping automatic migrations at startup.");
+
+        // Warn if there are pending migrations when skip is enabled
+        if (pendingMigrations.Length > 0)
+        {
+            Console.WriteLine("⚠️  WARNING: SKIP_MIGRATIONS is enabled but there are pending migrations!");
+            Console.WriteLine($"⚠️  Pending migrations: {string.Join(", ", pendingMigrations)}");
+            Console.WriteLine("⚠️  This may cause runtime errors due to schema drift.");
+            Console.WriteLine("⚠️  Consider applying migrations manually or setting SKIP_MIGRATIONS=false");
+
+            // In production, you may want to fail fast here:
+            // throw new InvalidOperationException("Pending migrations detected with SKIP_MIGRATIONS=true");
+        }
+    }
+
+    // Seed data
+    await BoonSeeder.SeedAsync(context, userManager);
+}
+
+app.Run();
