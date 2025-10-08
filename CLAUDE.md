@@ -65,7 +65,7 @@ del "BoonBuilder.API\boonbuilder.db" # Full path if needed
 rm -f boonbuilder.db          # Delete database to recreate with fresh data
 
 # Database is automatically created and seeded on API startup
-# Seeding includes all gods, boons, weapons, pets, and prerequisite relationships
+# Seeding includes all gods, boons, weapons, familiars, and prerequisite relationships
 ```
 
 ## Project Structure
@@ -97,19 +97,19 @@ BoonBuilder/
 
 ### Backend Structure (.NET 9 Web API)
 - **Program.cs**: Main entry point with EF migrations, CORS, and data seeding
-- **Data/BoonBuilderContext.cs**: EF Core DbContext with complex entity relationships including Pet integration
-- **Data/BoonSeeder.cs**: Comprehensive Hades II game data seeding (gods, boons, weapons, pets, prerequisites)
-- **Models/**: Game entities (God, Boon, DuoBoon, Weapon, WeaponAspect, Pet, Build) with proper inheritance
-- **Controllers/**: RESTful API endpoints (gods, boons, weapons, pets, builds, auth) with proper HTTP verbs
+- **Data/BoonBuilderContext.cs**: EF Core DbContext with complex entity relationships including Familiar integration
+- **Data/BoonSeeder.cs**: Comprehensive Hades II game data seeding (gods, boons, weapons, familiars, prerequisites)
+- **Models/**: Game entities (God, Boon, DuoBoon, Weapon, WeaponAspect, Familiar, Build) with proper inheritance
+- **Controllers/**: RESTful API endpoints (gods, boons, weapons, familiars, builds, auth) with proper HTTP verbs
 - **Services/**: Business logic layer (BoonService, BuildService) with interface abstractions
 
 ### Frontend Structure (React TypeScript)
 - **components/BoonBuilder.tsx**: Main application component with sidebar navigation and state management
 - **components/LoadoutPanel.tsx**: Extracted loadout display with 640px width and two-column layout (Main Loadout + Special Boons)
-- **components/LoadoutSlot.tsx**: Reusable slot component for weapon, pet, and boon displays with template image support
-- **components/RadialMenu.tsx**: Interactive circular menu for weapon/pet/boon selection with complex state flow including pet integration
+- **components/LoadoutSlot.tsx**: Reusable slot component for weapon, familiar, and boon displays with template image support
+- **components/RadialMenu.tsx**: Interactive circular menu for weapon/familiar/boon selection with complex state flow including familiar integration
 - **components/ImageWithFallback.tsx**: Image component with loading state management and useEffect prop change handling
-- **types/index.ts**: TypeScript definitions exactly matching backend models and enums, including Pet interface
+- **types/index.ts**: TypeScript definitions exactly matching backend models and enums, including Familiar interface
 - **services/api.ts**: Axios-based API client with full CRUD operations and error handling
 - **utils/boonPrerequisites.ts**: Complex prerequisite validation logic for duo/legendary boons
 
@@ -117,16 +117,18 @@ BoonBuilder/
 - **Gods** → **Boons** (1:Many): Each god has multiple core boons for different slots
 - **DuoBoons**: Inherit from Boon, require specific prerequisite combinations
 - **Weapons** → **WeaponAspects** (1:Many): Each weapon has multiple selectable aspects
-- **Pets**: Standalone entities for companion selection with 5 seeded pets (Frinos, Gale, Hecuba, Raki, Toula)
-- **Builds**: User-created combinations of weapon aspect + pet + selected boons
+- **Familiars**: Standalone entities for companion selection with 5 seeded familiars (Frinos, Gale, Hecuba, Raki, Toula)
+- **Builds**: User-created combinations of weapon aspect + familiar + selected boons
 - **BoonPrerequisites**: Complex prerequisite system for duo boons with alternative groups
 
 ### Critical Implementation Details
 
 #### Enum Synchronization
-Frontend and backend enums must match exactly:
-- **BoonSlot**: Attack=1, Special=2, Cast=3, Sprint=4, Magick=6 (1-based, note Magick=6)
-- **BoonType**: Core=0, Duo=1, Legendary=2, etc.
+**IMPORTANT**: Frontend and backend enums have different starting values:
+- **Frontend (TypeScript)**: 0-based values (BoonType.Core = 0, BoonSlot.Attack = 1)
+- **Backend (.NET)**: 1-based values (BoonType.Core = 1, BoonSlot.Attack = 1)
+- **BoonSlot**: Attack=1, Special=2, Cast=3, Sprint=4, Magick=6 (note Magick=6)
+- Watch for enum mismatches when comparing values between frontend/backend
 
 #### API Data Structure
 - Boons returned from API include nested `God` object, not direct `godId`
@@ -134,14 +136,14 @@ Frontend and backend enums must match exactly:
 - WeaponAspects are nested within Weapon objects as `aspects[]`
 
 #### RadialMenu State Management
-- **MenuState Flow**: main → weapon → aspect (for weapons) OR main → pet (for pets) OR main → slot → god → boon (for boons)
-- **MenuState Type**: `'main' | 'weapon' | 'aspect' | 'pet' | 'god' | 'boon' | 'legendary' | 'duo'`
+- **MenuState Flow**: main → weapon → aspect (for weapons) OR main → familiar (for familiars) OR main → slot → god → boon (for boons)
+- **MenuState Type**: `'main' | 'weapon' | 'aspect' | 'familiar' | 'god' | 'boon' | 'legendary' | 'duo'`
 - **Filtering Logic**: `boons.filter(boon => boon.god?.godId === selectedGod.godId && boon.slot === selectedSlot)`
-- **Type Safety**: renderRadialItem accepts union type `RadialMenuItem | God | Boon | Weapon | WeaponAspect | Pet`
+- **Type Safety**: renderRadialItem accepts union type `RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar`
 
 #### Database Seeding
 - BoonSeeder contains complete Hades II game data with proper IGN image URLs
-- Pet seeding includes 5 companions: Frinos, Gale, Hecuba, Raki, Toula with descriptions
+- Familiar seeding includes 5 companions: Frinos, Gale, Hecuba, Raki, Toula with descriptions
 - Prerequisite system uses AlternativeGroupId for "any boon from group" logic
 - Database recreated on startup if schema changes
 
@@ -168,14 +170,14 @@ Frontend and backend enums must match exactly:
 - **Debug issues**: Check browser console, API logs, database contents
 
 ### Important Technical Notes
-- **Enum Synchronization**: Backend uses 1-based enum values (BoonSlot: Attack=1, Special=2, Cast=3, Sprint=4, Magick=6)
+- **Enum Synchronization**: Frontend uses 0-based values (BoonType.Core=0), Backend uses 1-based (BoonType.Core=1). BoonSlot: Attack=1, Special=2, Cast=3, Sprint=4, Magick=6
 - **API Data Structure**: God relationships in responses are nested objects (`boon.god?.godId`), not direct IDs
-- **Database Seeding**: Comprehensive Hades II game data auto-loads on API startup including pets
-- **RadialMenu State**: Complex state flow supporting weapon/aspect, pet, and slot/god/boon selection paths
+- **Database Seeding**: Comprehensive Hades II game data auto-loads on API startup including familiars
+- **RadialMenu State**: Complex state flow supporting weapon/aspect, familiar, and slot/god/boon selection paths
 - **LoadoutPanel Design**: 640px width with two-column layout for improved boon visibility
 - **Image Loading**: ImageWithFallback uses useEffect to reset state when src prop changes
-- **Component Architecture**: LoadoutSlot reusable component supports weapon, pet, and boon slot types
-- **Type Safety**: Frontend TypeScript definitions must exactly match backend models including Pet interface
+- **Component Architecture**: LoadoutSlot reusable component supports weapon, familiar, and boon slot types
+- **Type Safety**: Frontend TypeScript definitions must exactly match backend models including Familiar interface
 
 ## Troubleshooting
 
@@ -208,22 +210,22 @@ npm install
 - Verify REACT_APP_API_URL environment variable
 
 **Enum Mismatch Errors:**
-- Backend enums are 1-based (Attack=1, Special=2, etc.)
-- Frontend TypeScript enums must match exactly
-- Check both Models/Enums.cs and src/types/index.ts
+- Frontend enums are 0-based (BoonType.Core=0), Backend enums are 1-based (BoonType.Core=1)
+- BoonSlot enums match on both sides (Attack=1, Special=2, etc.)
+- Check both Models/Enums.cs and src/types/index.ts when debugging enum issues
 
-**Pet System Issues:**
+**Familiar System Issues:**
 ```bash
-# Pet API not returning data
-# Check PetsController.cs filters non-hidden pets
-# Verify BoonSeeder.cs includes pet data
-# Check frontend Pet interface matches backend model
+# Familiar API not returning data
+# Check FamiliarsController.cs filters non-hidden familiars
+# Verify BoonSeeder.cs includes familiar data
+# Check frontend Familiar interface matches backend model
 ```
 
 **LoadoutPanel Display Issues:**
 - Verify LoadoutSlot component props match slot type expectations
 - Check template image paths in `/public/images/slots/` directory
-- Ensure BuildState includes `pet?: Pet` property
+- Ensure BuildState includes `familiar?: Familiar` property
 - Validate two-column layout responsive behavior on smaller screens
 
 **Image Loading Problems:**
@@ -259,12 +261,12 @@ This documentation-first approach ensures comprehensive project context, facilit
 
 ## Recent Development Insights
 
-### Pet System Implementation (September 2025)
-- **Backend**: Complete Pet model with EF Core integration, following existing entity patterns
-- **API**: RESTful endpoints at `/api/pets` and `/api/pets/{id}` matching controller conventions
-- **Database**: Automatic seeding of 5 pets (Frinos, Gale, Hecuba, Raki, Toula) via BoonSeeder
-- **Frontend**: Pet slot integration into RadialMenu with proper state management flow
-- **Type Integration**: Pet interface in types/index.ts and BuildState updated with `pet?: Pet`
+### Familiar System Implementation (September 2025)
+- **Backend**: Complete Familiar model with EF Core integration, following existing entity patterns
+- **API**: RESTful endpoints at `/api/familiars` and `/api/familiars/{id}` matching controller conventions
+- **Database**: Automatic seeding of 5 familiars (Frinos, Gale, Hecuba, Raki, Toula) via BoonSeeder
+- **Frontend**: Familiar slot integration into RadialMenu with proper state management flow
+- **Type Integration**: Familiar interface in types/index.ts and BuildState updated with `familiar?: Familiar`
 
 ### ImageWithFallback Loading Fix
 - **Issue**: Boon images only appeared after page navigation due to stale component state
@@ -277,29 +279,29 @@ This documentation-first approach ensures comprehensive project context, facilit
 - **Layout**: Two-column design with Main Loadout (left) and Special Boons (right)
 - **Components**: Extracted LoadoutPanel and LoadoutSlot as reusable components
 - **Game Authenticity**: Used provided template images for authentic Hades II styling
-- **Slot Types**: LoadoutSlot supports `slotType: 'weapon' | 'pet' | 'boon'` with proper empty state handling
+- **Slot Types**: LoadoutSlot supports `slotType: 'weapon' | 'familiar' | 'boon'` with proper empty state handling
 
 ### Component Architecture Patterns
-- **LoadoutSlot Reusability**: Single component handles weapon/aspect, pet, and boon display with different prop combinations
+- **LoadoutSlot Reusability**: Single component handles weapon/aspect, familiar, and boon display with different prop combinations
 - **Template Image Integration**: Empty slot states use template images from `/public/images/slots/` directory
-- **State Management**: BuildState includes optional pet selection alongside existing weapon/aspect/boons structure
-- **MenuState Flow**: RadialMenu state machine includes pet selection path: main → pet → selection → main
+- **State Management**: BuildState includes optional familiar selection alongside existing weapon/aspect/boons structure
+- **MenuState Flow**: RadialMenu state machine includes familiar selection path: main → familiar → selection → main
 
 ### Layout Organization
 - **Structure**: Sidebar (left) → LoadoutPanel (center) → RadialMenu (right)
 - **LoadoutPanel**: 640px width with two-column layout (Main Loadout left, Special Boons right)
-- **Slot Ordering**: Weapon → Pet → Attack → Special → Cast → Sprint → Magicka
+- **Slot Ordering**: Weapon → Familiar → Attack → Special → Cast → Sprint → Magicka
 - **Template Assets**: Empty slot images in `/public/images/slots/` directory
 - **Responsive**: Maintained responsive design principles while expanding loadout size
 
 ### Git Commit Strategy
-- **Feature-based commits**: Separate commits for Pet system, image fixes, loadout redesign, and assets
+- **Feature-based commits**: Separate commits for Familiar system, image fixes, loadout redesign, and assets
 - **Clear descriptions**: Descriptive commit messages following conventional commit format
 - **Documentation updates**: Synchronized commits with documentation updates for traceability
-- **Recent Example**: Four commits for Pet implementation: backend integration, image fix, loadout redesign, frontend integration
+- **Recent Example**: Four commits for Familiar implementation: backend integration, image fix, loadout redesign, frontend integration
 
 ### Asset Management Workflow
-- **Template Images**: Store empty slot templates in `/public/images/slots/` (weapon.png, pet.png, etc.)
-- **Game Assets**: Organized by type in `/public/images/` subdirectories (boons, gods, weapons, aspects, pets)
+- **Template Images**: Store empty slot templates in `/public/images/slots/` (weapon.png, familiar.png, etc.)
+- **Game Assets**: Organized by type in `/public/images/` subdirectories (boons, gods, weapons, aspects, familiars)
 - **Fallback Strategy**: ImageWithFallback component handles .webp → .svg → icon fallback chain
 - **Asset Integration**: LoadoutSlot component uses template images for empty state display

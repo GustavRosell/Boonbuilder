@@ -12,6 +12,31 @@ const ICON_MAP: Record<string, { src: string; alt: string; className: string }> 
     alt: 'Magick',
     className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
   },
+  'Fire': {
+    src: '/images/elements/Element_Fire_logo.webp',
+    alt: 'Fire',
+    className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
+  },
+  'Earth': {
+    src: '/images/elements/Element_Earth_logo.webp',
+    alt: 'Earth',
+    className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
+  },
+  'Water': {
+    src: '/images/elements/Element_Water_logo.webp',
+    alt: 'Water',
+    className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
+  },
+  'Air': {
+    src: '/images/elements/Element_Air_logo.webp',
+    alt: 'Air',
+    className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
+  },
+  'Aether': {
+    src: '/images/elements/Element_Aether_logo.webp',
+    alt: 'Aether',
+    className: 'inline-block w-4 h-4 align-text-bottom mx-0.5'
+  },
   // Future: Add more game icons here
   // 'Health': { src: '/images/Other/Health_Logo.webp', alt: 'Health', className: '...' },
   // 'Armor': { src: '/images/Other/Armor_Logo.webp', alt: 'Armor', className: '...' },

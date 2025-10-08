@@ -60,7 +60,7 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
             selectedItem={selectedBuild.weapon}
             selectedAspect={selectedBuild.aspect}
             onRemove={selectedBuild.weapon ? onRemoveWeapon : undefined}
-            emptyIcon="/images/slots/weapon.png"
+            emptyIcon="/images/slots/weapon.webp"
             emptyLabel="No Weapon"
             variant="large"
           />

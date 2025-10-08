@@ -57,18 +57,65 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Slot definitions for the main menu
-  const slots: RadialMenuItem[] = [
-    { id: 'weapon', name: 'Weapon', iconUrl: '/images/slots/weapon.png', angle: 0 },
-    { id: 'familiar', name: 'Familiar', iconUrl: '/images/slots/familiar.png', angle: 40 },
-    { id: 'attack', name: 'Attack', iconUrl: '/images/slots/attack.png', angle: 80 },
-    { id: 'special', name: 'Special', iconUrl: '/images/slots/special.png', angle: 120 },
-    { id: 'cast', name: 'Cast', iconUrl: '/images/slots/cast.png', angle: 160 },
-    { id: 'sprint', name: 'Sprint', iconUrl: '/images/slots/sprint.png', angle: 200 },
-    { id: 'magick', name: 'Magick', iconUrl: '/images/slots/magicka.png', angle: 240 },
-    { id: 'legendary', name: 'Legendary', iconUrl: '/images/slots/legendary.png', angle: 280 },
-    { id: 'duo', name: 'Duo', iconUrl: '/images/slots/duo.png', angle: 320 }
-  ];
+  // Generate slot definitions for the main menu with selected item icons
+  const getSlots = (): RadialMenuItem[] => {
+    return [
+      {
+        id: 'weapon',
+        name: selectedAspect ? selectedAspect.name : 'Weapon',
+        iconUrl: selectedAspect?.iconUrl || '/images/slots/weapon.webp',
+        angle: 0
+      },
+      {
+        id: 'familiar',
+        name: selectedFamiliar ? selectedFamiliar.name : 'Familiar',
+        iconUrl: selectedFamiliar?.iconUrl || '/images/slots/familiar.png',
+        angle: 40
+      },
+      {
+        id: 'attack',
+        name: selectedBoons.get(BoonSlot.Attack)?.name || 'Attack',
+        iconUrl: selectedBoons.get(BoonSlot.Attack)?.iconUrl || '/images/slots/attack.png',
+        angle: 80
+      },
+      {
+        id: 'special',
+        name: selectedBoons.get(BoonSlot.Special)?.name || 'Special',
+        iconUrl: selectedBoons.get(BoonSlot.Special)?.iconUrl || '/images/slots/special.png',
+        angle: 120
+      },
+      {
+        id: 'cast',
+        name: selectedBoons.get(BoonSlot.Cast)?.name || 'Cast',
+        iconUrl: selectedBoons.get(BoonSlot.Cast)?.iconUrl || '/images/slots/cast.png',
+        angle: 160
+      },
+      {
+        id: 'sprint',
+        name: selectedBoons.get(BoonSlot.Sprint)?.name || 'Sprint',
+        iconUrl: selectedBoons.get(BoonSlot.Sprint)?.iconUrl || '/images/slots/sprint.png',
+        angle: 200
+      },
+      {
+        id: 'magick',
+        name: selectedBoons.get(BoonSlot.Magick)?.name || 'Magick',
+        iconUrl: selectedBoons.get(BoonSlot.Magick)?.iconUrl || '/images/slots/magicka.png',
+        angle: 240
+      },
+      {
+        id: 'legendary',
+        name: 'Legendary',
+        iconUrl: '/images/slots/legendary.png',
+        angle: 280
+      },
+      {
+        id: 'duo',
+        name: 'Duo',
+        iconUrl: '/images/slots/duo.png',
+        angle: 320
+      }
+    ];
+  };
 
   const renderRadialItem = (
     item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar | FamiliarAbility | AvailableBoon,
@@ -361,7 +408,7 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   const getCurrentItems = () => {
     switch (menuState) {
       case 'main':
-        return slots;
+        return getSlots();
       case 'weapon':
         return weapons;
       case 'aspect':
