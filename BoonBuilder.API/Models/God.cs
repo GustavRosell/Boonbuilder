@@ -5,6 +5,7 @@ namespace BoonBuilder.Models
         public int GodId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string IconUrl { get; set; } = string.Empty;
+        public string? InfusionIconUrl { get; set; }
         public ElementType? PrimaryElement { get; set; }
         public ElementType? SecondaryElement { get; set; }
         public string StatusEffect { get; set; } = string.Empty;

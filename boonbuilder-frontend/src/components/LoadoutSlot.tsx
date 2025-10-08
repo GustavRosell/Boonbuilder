@@ -1,7 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { BoonSlot, Boon, Weapon, WeaponAspect, Familiar } from '../types';
+import { BoonSlot, Boon, Weapon, WeaponAspect, Familiar, FamiliarAbility } from '../types';
 import ImageWithFallback from './ImageWithFallback';
+import RichText from './RichText';
 
 interface LoadoutSlotProps {
   slotType: 'weapon' | 'familiar' | 'boon';
@@ -9,6 +10,7 @@ interface LoadoutSlotProps {
   boonSlot?: BoonSlot;
   selectedItem?: Boon | Weapon | Familiar;
   selectedAspect?: WeaponAspect; // Only for weapon slots
+  selectedFamiliarAbility?: FamiliarAbility; // Only for familiar slots
   onRemove?: () => void;
   emptyIcon: string; // Path to the empty slot template image
   emptyLabel: string;
@@ -20,6 +22,7 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
   slotName,
   selectedItem,
   selectedAspect,
+  selectedFamiliarAbility,
   onRemove,
   emptyIcon,
   emptyLabel,
@@ -44,12 +47,28 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
       return selectedAspect.name;
     }
 
+    if (slotType === 'familiar' && selectedFamiliarAbility) {
+      return selectedFamiliarAbility.name;
+    }
+
     if (slotType === 'boon') {
       const boon = selectedItem as Boon;
+      // Show god name for boons
       return boon.god?.name || '';
     }
 
     return selectedItem.description.substring(0, 40) + '...';
+  };
+
+  const getFullDescription = (): string | null => {
+    if (!selectedItem || slotType === 'weapon') return null;
+
+    // Show familiar ability description if available
+    if (slotType === 'familiar' && selectedFamiliarAbility) {
+      return selectedFamiliarAbility.description;
+    }
+
+    return selectedItem.description;
   };
 
   // Size classes depending on variant
@@ -102,6 +121,12 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
           <div className="text-xs text-purple-300 mt-1">
             {getSubtext()}
           </div>
+        )}
+        {getFullDescription() && (
+          <RichText
+            text={getFullDescription()!}
+            className="text-xs text-gray-300 mt-1.5 italic"
+          />
         )}
       </div>
 

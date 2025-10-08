@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn 
 import RadialMenu from './RadialMenu';
 import LoadoutPanel from './LoadoutPanel';
 import DebugPanel from './DebugPanel';
-import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Familiar, AvailableBoon } from '../types';
+import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Familiar, FamiliarAbility, AvailableBoon } from '../types';
 import { godsApi, boonsApi, weaponsApi, familiarsApi } from '../services/api';
 import { extractSelectedBoonIds, filterAvailableBoons } from '../utils/boonPrerequisites';
 
@@ -78,12 +78,12 @@ const BoonBuilder: React.FC = () => {
     setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined });
   };
 
-  const handleSelectFamiliar = (familiar: Familiar) => {
-    setSelectedBuild({ ...selectedBuild, familiar });
+  const handleSelectFamiliar = (familiar: Familiar, ability: FamiliarAbility) => {
+    setSelectedBuild({ ...selectedBuild, familiar, familiarAbility: ability });
   };
 
   const handleRemoveFamiliar = () => {
-    setSelectedBuild({ ...selectedBuild, familiar: undefined });
+    setSelectedBuild({ ...selectedBuild, familiar: undefined, familiarAbility: undefined });
   };
 
   const handleSelectDuoBoon = (boon: AvailableBoon) => {
@@ -290,6 +290,7 @@ const BoonBuilder: React.FC = () => {
                   selectedWeapon={selectedBuild.weapon}
                   selectedAspect={selectedBuild.aspect}
                   selectedFamiliar={selectedBuild.familiar}
+                  selectedFamiliarAbility={selectedBuild.familiarAbility}
                 />
               </div>
             </div>

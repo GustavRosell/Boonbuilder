@@ -3,6 +3,7 @@ using System;
 using BoonBuilder.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BoonBuilder.API.Migrations
 {
     [DbContext(typeof(BoonBuilderContext))]
-    partial class BoonBuilderContextModelSnapshot : ModelSnapshot
+    [Migration("20251007070748_AddInfusionToGods")]
+    partial class AddInfusionToGods
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
@@ -228,9 +231,6 @@ namespace BoonBuilder.API.Migrations
                     b.Property<int>("Difficulty")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("FamiliarAbilityId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int?>("FamiliarId")
                         .HasColumnType("INTEGER");
 
@@ -265,8 +265,6 @@ namespace BoonBuilder.API.Migrations
                     b.HasKey("BuildId");
 
                     b.HasIndex("AuthorId");
-
-                    b.HasIndex("FamiliarAbilityId");
 
                     b.HasIndex("FamiliarId");
 
@@ -331,40 +329,6 @@ namespace BoonBuilder.API.Migrations
                     b.HasKey("FamiliarId");
 
                     b.ToTable("Familiars");
-                });
-
-            modelBuilder.Entity("BoonBuilder.Models.FamiliarAbility", b =>
-                {
-                    b.Property<int>("AbilityId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("FamiliarId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("IconUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("AbilityId");
-
-                    b.HasIndex("FamiliarId");
-
-                    b.ToTable("FamiliarAbilities");
                 });
 
             modelBuilder.Entity("BoonBuilder.Models.God", b =>
@@ -687,14 +651,10 @@ namespace BoonBuilder.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BoonBuilder.Models.FamiliarAbility", "FamiliarAbility")
+                    b.HasOne("BoonBuilder.Models.Familiar", "Familiar")
                         .WithMany("Builds")
-                        .HasForeignKey("FamiliarAbilityId")
+                        .HasForeignKey("FamiliarId")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("BoonBuilder.Models.Familiar", null)
-                        .WithMany("Builds")
-                        .HasForeignKey("FamiliarId");
 
                     b.HasOne("BoonBuilder.Models.WeaponAspect", "WeaponAspect")
                         .WithMany("Builds")
@@ -704,7 +664,7 @@ namespace BoonBuilder.API.Migrations
 
                     b.Navigation("Author");
 
-                    b.Navigation("FamiliarAbility");
+                    b.Navigation("Familiar");
 
                     b.Navigation("WeaponAspect");
                 });
@@ -726,17 +686,6 @@ namespace BoonBuilder.API.Migrations
                     b.Navigation("Boon");
 
                     b.Navigation("Build");
-                });
-
-            modelBuilder.Entity("BoonBuilder.Models.FamiliarAbility", b =>
-                {
-                    b.HasOne("BoonBuilder.Models.Familiar", "Familiar")
-                        .WithMany("Abilities")
-                        .HasForeignKey("FamiliarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Familiar");
                 });
 
             modelBuilder.Entity("BoonBuilder.Models.UserFavorite", b =>
@@ -865,13 +814,6 @@ namespace BoonBuilder.API.Migrations
                 });
 
             modelBuilder.Entity("BoonBuilder.Models.Familiar", b =>
-                {
-                    b.Navigation("Abilities");
-
-                    b.Navigation("Builds");
-                });
-
-            modelBuilder.Entity("BoonBuilder.Models.FamiliarAbility", b =>
                 {
                     b.Navigation("Builds");
                 });

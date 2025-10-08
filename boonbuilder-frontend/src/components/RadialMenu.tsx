@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { God, Boon, BoonSlot, RadialMenuItem, Weapon, WeaponAspect, Familiar, AvailableBoon } from '../types';
+import { God, Boon, BoonSlot, RadialMenuItem, Weapon, WeaponAspect, Familiar, FamiliarAbility, AvailableBoon } from '../types';
 import ImageWithFallback from './ImageWithFallback';
+import RichText from './RichText';
 
 interface RadialMenuProps {
   gods: God[];
@@ -14,16 +15,17 @@ interface RadialMenuProps {
   onSelectDuoBoon: (boon: AvailableBoon) => void;
   onSelectLegendaryBoon: (boon: AvailableBoon) => void;
   onSelectWeapon: (weapon: Weapon, aspect: WeaponAspect) => void;
-  onSelectFamiliar: (familiar: Familiar) => void;
+  onSelectFamiliar: (familiar: Familiar, ability: FamiliarAbility) => void;
   selectedBoons: Map<BoonSlot, Boon>;
   selectedDuoBoons: AvailableBoon[];
   selectedLegendaryBoons: AvailableBoon[];
   selectedWeapon?: Weapon;
   selectedAspect?: WeaponAspect;
   selectedFamiliar?: Familiar;
+  selectedFamiliarAbility?: FamiliarAbility;
 }
 
-type MenuState = 'main' | 'weapon' | 'aspect' | 'familiar' | 'god' | 'boon' | 'legendary' | 'duo';
+type MenuState = 'main' | 'weapon' | 'aspect' | 'familiar' | 'familiar_ability' | 'god' | 'boon' | 'legendary' | 'duo';
 
 const RadialMenu: React.FC<RadialMenuProps> = ({
   gods,
@@ -43,11 +45,13 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   selectedWeapon,
   selectedAspect,
   selectedFamiliar,
+  selectedFamiliarAbility,
 }) => {
   const [menuState, setMenuState] = useState<MenuState>('main');
   const [selectedSlot, setSelectedSlot] = useState<BoonSlot | null>(null);
   const [selectedGod, setSelectedGod] = useState<God | null>(null);
   const [selectedWeaponForAspect, setSelectedWeaponForAspect] = useState<Weapon | null>(null);
+  const [selectedFamiliarForAbility, setSelectedFamiliarForAbility] = useState<Familiar | null>(null);
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
   const [rotation] = useState(0);
 
@@ -55,19 +59,19 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
 
   // Slot definitions for the main menu
   const slots: RadialMenuItem[] = [
-    { id: 'weapon', name: 'Weapon', icon: '⚔️', angle: 0 },
-    { id: 'familiar', name: 'Familiar', icon: '🐸', angle: 40 },
-    { id: 'attack', name: 'Attack', icon: '⚡', angle: 80 },
-    { id: 'special', name: 'Special', icon: '✨', angle: 120 },
-    { id: 'cast', name: 'Cast', icon: '🔮', angle: 160 },
-    { id: 'sprint', name: 'Sprint', icon: '💨', angle: 200 },
-    { id: 'magick', name: 'Magick', icon: '💫', angle: 240 },
-    { id: 'legendary', name: 'Legendary', icon: '⭐', angle: 280 },
-    { id: 'duo', name: 'Duo', icon: '🤝', angle: 320 }
+    { id: 'weapon', name: 'Weapon', iconUrl: '/images/slots/weapon.png', angle: 0 },
+    { id: 'familiar', name: 'Familiar', iconUrl: '/images/slots/familiar.png', angle: 40 },
+    { id: 'attack', name: 'Attack', iconUrl: '/images/slots/attack.png', angle: 80 },
+    { id: 'special', name: 'Special', iconUrl: '/images/slots/special.png', angle: 120 },
+    { id: 'cast', name: 'Cast', iconUrl: '/images/slots/cast.png', angle: 160 },
+    { id: 'sprint', name: 'Sprint', iconUrl: '/images/slots/sprint.png', angle: 200 },
+    { id: 'magick', name: 'Magick', iconUrl: '/images/slots/magicka.png', angle: 240 },
+    { id: 'legendary', name: 'Legendary', iconUrl: '/images/slots/legendary.png', angle: 280 },
+    { id: 'duo', name: 'Duo', iconUrl: '/images/slots/duo.png', angle: 320 }
   ];
 
   const renderRadialItem = (
-    item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar | AvailableBoon,
+    item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar | FamiliarAbility | AvailableBoon,
     index: number,
     total: number,
     radius: number = 150
@@ -93,19 +97,18 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
       return '?';
     };
 
-    // Get tooltip text for locked boons
+    // Get prerequisite message for locked boons
     const getTooltipText = (): string => {
-      const baseName = getName(item);
       if (isSpecialBoon && !isAvailable) {
         const availableBoon = item as AvailableBoon;
         if (availableBoon.type === 'Duo' && availableBoon.firstGod && availableBoon.secondGod) {
-          return `${baseName} (Locked: Need boons from ${availableBoon.firstGod.name} and ${availableBoon.secondGod.name})`;
+          return `Need boons from ${availableBoon.firstGod.name} and ${availableBoon.secondGod.name}`;
         } else if (availableBoon.type === 'Legendary' && availableBoon.god) {
-          return `${baseName} (Locked: Need multiple boons from ${availableBoon.god.name})`;
+          return `Need multiple boons from ${availableBoon.god.name}`;
         }
-        return `${baseName} (Prerequisites not met)`;
+        return `Prerequisites not met`;
       }
-      return baseName;
+      return '';
     };
 
     return (
@@ -151,16 +154,27 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         </div>
         {isHovered && (
           <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2
-            bg-gray-900/95 text-white px-3 py-1 rounded-lg whitespace-nowrap text-sm
-            border border-purple-400 shadow-lg z-30 max-w-xs text-center">
-            {getTooltipText()}
+            bg-gray-900/95 text-white px-3 py-2 rounded-lg text-sm
+            border border-purple-400 shadow-lg z-30 max-w-xs">
+            <div className="font-semibold text-center mb-1">{getName(item)}</div>
+            {(item as any).description && (
+              <RichText
+                text={(item as any).description}
+                className="text-gray-300 text-xs text-center"
+              />
+            )}
+            {isSpecialBoon && !isAvailable && (
+              <div className="text-yellow-300 text-xs mt-1 text-center">
+                🔒 {getTooltipText()}
+              </div>
+            )}
           </div>
         )}
       </div>
     );
   };
 
-  const handleItemClick = (item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar | AvailableBoon) => {
+  const handleItemClick = (item: RadialMenuItem | God | Boon | Weapon | WeaponAspect | Familiar | FamiliarAbility | AvailableBoon) => {
     if (menuState === 'main') {
       // Handle slot selection
       const slotItem = item as RadialMenuItem;
@@ -202,10 +216,18 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
       onSelectDuoBoon(duoBoon);
       setMenuState('main');
     } else if (menuState === 'familiar') {
-      // Handle familiar selection
+      // Handle familiar selection - show abilities
       const familiar = item as Familiar;
-      onSelectFamiliar(familiar);
+      setSelectedFamiliarForAbility(familiar);
+      setMenuState('familiar_ability');
+    } else if (menuState === 'familiar_ability') {
+      // Handle familiar ability selection
+      const ability = item as FamiliarAbility;
+      if (selectedFamiliarForAbility) {
+        onSelectFamiliar(selectedFamiliarForAbility, ability);
+      }
       setMenuState('main');
+      setSelectedFamiliarForAbility(null);
     } else if (menuState === 'god') {
       // Handle god selection
       setSelectedGod(item as God);
@@ -243,6 +265,11 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
   const getFilteredAspects = (): WeaponAspect[] => {
     if (!selectedWeaponForAspect) return [];
     return selectedWeaponForAspect.aspects || [];
+  };
+
+  const getFilteredAbilities = (): FamiliarAbility[] => {
+    if (!selectedFamiliarForAbility) return [];
+    return (selectedFamiliarForAbility.abilities || []).filter(ability => !ability.isHidden);
   };
 
   const renderCenterButton = () => {
@@ -341,6 +368,8 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         return getFilteredAspects();
       case 'familiar':
         return familiars;
+      case 'familiar_ability':
+        return getFilteredAbilities();
       case 'legendary':
         return availableLegendaryBoons;
       case 'duo':
@@ -376,6 +405,8 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         {menuState === 'main' && 'Select Category'}
         {menuState === 'weapon' && 'Select Weapon'}
         {menuState === 'aspect' && `Select ${selectedWeaponForAspect?.name} Aspect`}
+        {menuState === 'familiar' && 'Select Familiar'}
+        {menuState === 'familiar_ability' && `Select ${selectedFamiliarForAbility?.name} Ability`}
         {menuState === 'legendary' && 'Select Legendary Boon'}
         {menuState === 'duo' && 'Select Duo Boon'}
         {menuState === 'god' && `Select God for ${selectedSlot !== null ? BoonSlot[selectedSlot] : ''}`}

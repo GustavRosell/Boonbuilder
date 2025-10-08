@@ -18,12 +18,32 @@ namespace BoonBuilder.Controllers
 
         // GET: api/familiars
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Familiar>>> GetFamiliars()
+        public async Task<ActionResult<IEnumerable<object>>> GetFamiliars()
         {
-            return await _context.Familiars
+            var familiars = await _context.Familiars
+                .Include(f => f.Abilities)
                 .Where(f => !f.IsHidden)
+                .Select(f => new
+                {
+                    f.FamiliarId,
+                    f.Name,
+                    f.IconUrl,
+                    f.Description,
+                    f.IsHidden,
+                    Abilities = f.Abilities.Select(a => new
+                    {
+                        a.AbilityId,
+                        a.FamiliarId,
+                        a.Name,
+                        a.IconUrl,
+                        a.Description,
+                        a.IsHidden
+                    })
+                })
                 .OrderBy(f => f.FamiliarId)
                 .ToListAsync();
+
+            return Ok(familiars);
         }
 
         // GET: api/familiars/5

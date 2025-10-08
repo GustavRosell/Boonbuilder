@@ -41,7 +41,9 @@
       "Bash(for god in aphrodite apollo demeter hephaestus hera hestia poseidon zeus)",
       "Bash(do echo \"=== $god ===\")",
       "Bash(ls:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(taskkill:*)",
+      "Bash(Select-Object -First 20)"
     ],
     "deny": [],
     "ask": []

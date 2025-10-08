@@ -147,12 +147,23 @@ export interface Weapon {
   aspects: WeaponAspect[];
 }
 
+export interface FamiliarAbility {
+  abilityId: number;
+  familiarId: number;
+  name: string;
+  iconUrl: string;
+  description: string;
+  isHidden: boolean;
+  familiar?: Familiar;
+}
+
 export interface Familiar {
   familiarId: number;
   name: string;
   iconUrl: string;
   description: string;
   isHidden: boolean;
+  abilities: FamiliarAbility[];
 }
 
 export interface Build {
@@ -161,6 +172,7 @@ export interface Build {
   description: string;
   authorId: string;
   weaponAspectId: number;
+  familiarAbilityId?: number;
   difficulty: BuildDifficulty;
   tier: BuildTier;
   isFeatured: boolean;
@@ -171,6 +183,7 @@ export interface Build {
   playstyleTags: string;
   author?: any;
   weaponAspect?: WeaponAspect;
+  familiarAbility?: FamiliarAbility;
   buildBoons?: BuildBoon[];
 }
 
@@ -226,6 +239,7 @@ export interface BuildState {
   weapon?: Weapon;
   aspect?: WeaponAspect;
   familiar?: Familiar;
+  familiarAbility?: FamiliarAbility;
   boons: Map<BoonSlot, Boon>;
   duoBoons: AvailableBoon[];
   legendaryBoons: AvailableBoon[];

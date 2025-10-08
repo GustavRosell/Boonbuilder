@@ -13,6 +13,7 @@ namespace BoonBuilder.Data
         public DbSet<Weapon> Weapons { get; set; }
         public DbSet<WeaponAspect> WeaponAspects { get; set; }
         public DbSet<Familiar> Familiars { get; set; }
+        public DbSet<FamiliarAbility> FamiliarAbilities { get; set; }
         public DbSet<Boon> Boons { get; set; }
         public DbSet<DuoBoon> DuoBoons { get; set; }
         public DbSet<BoonRarityValue> BoonRarityValues { get; set; }
@@ -58,6 +59,9 @@ namespace BoonBuilder.Data
             modelBuilder.Entity<WeaponAspect>()
                 .HasKey(wa => wa.AspectId);
 
+            modelBuilder.Entity<FamiliarAbility>()
+                .HasKey(fa => fa.AbilityId);
+
             modelBuilder.Entity<BoonPrerequisite>()
                 .HasOne(bp => bp.Boon)
                 .WithMany(b => b.Prerequisites)
@@ -84,10 +88,17 @@ namespace BoonBuilder.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Build>()
-                .HasOne(b => b.Familiar)
-                .WithMany(f => f.Builds)
-                .HasForeignKey(b => b.FamiliarId)
+                .HasOne(b => b.FamiliarAbility)
+                .WithMany(fa => fa.Builds)
+                .HasForeignKey(b => b.FamiliarAbilityId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Configure FamiliarAbility relationship
+            modelBuilder.Entity<FamiliarAbility>()
+                .HasOne(fa => fa.Familiar)
+                .WithMany(f => f.Abilities)
+                .HasForeignKey(fa => fa.FamiliarId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Configure UserFavorite relationships
             modelBuilder.Entity<UserFavorite>()
@@ -143,6 +154,13 @@ namespace BoonBuilder.Data
             });
 
             modelBuilder.Entity<Familiar>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(100);
+                entity.Property(e => e.IconUrl).HasMaxLength(500);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+            });
+
+            modelBuilder.Entity<FamiliarAbility>(entity =>
             {
                 entity.Property(e => e.Name).HasMaxLength(100);
                 entity.Property(e => e.IconUrl).HasMaxLength(500);

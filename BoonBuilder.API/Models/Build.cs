@@ -7,7 +7,7 @@ namespace BoonBuilder.Models
         public string Description { get; set; } = string.Empty;
         public string AuthorId { get; set; } = string.Empty;
         public int WeaponAspectId { get; set; }
-        public int? FamiliarId { get; set; } // Optional familiar selection
+        public int? FamiliarAbilityId { get; set; } // Optional familiar ability selection
         public BuildDifficulty Difficulty { get; set; }
         public BuildTier Tier { get; set; }
         public bool IsFeatured { get; set; }
@@ -20,7 +20,7 @@ namespace BoonBuilder.Models
         // Navigation properties
         public ApplicationUser Author { get; set; } = null!;
         public WeaponAspect WeaponAspect { get; set; } = null!;
-        public Familiar? Familiar { get; set; } // Optional familiar relationship
+        public FamiliarAbility? FamiliarAbility { get; set; } // Optional familiar ability relationship
         public ICollection<BuildBoon> BuildBoons { get; set; } = new List<BuildBoon>();
         public ICollection<UserFavorite> Favorites { get; set; } = new List<UserFavorite>();
     }

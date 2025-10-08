@@ -70,6 +70,7 @@ const LoadoutPanel: React.FC<LoadoutPanelProps> = ({
             slotType="familiar"
             slotName="Familiar"
             selectedItem={selectedBuild.familiar}
+            selectedFamiliarAbility={selectedBuild.familiarAbility}
             onRemove={selectedBuild.familiar ? onRemoveFamiliar : undefined}
             emptyIcon="/images/slots/familiar.png"
             emptyLabel="No Familiar"

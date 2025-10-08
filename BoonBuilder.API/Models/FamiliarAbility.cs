@@ -1,7 +1,8 @@
 namespace BoonBuilder.Models
 {
-    public class Familiar
+    public class FamiliarAbility
     {
+        public int AbilityId { get; set; }
         public int FamiliarId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string IconUrl { get; set; } = string.Empty;
@@ -9,7 +10,7 @@ namespace BoonBuilder.Models
         public bool IsHidden { get; set; } = false;
 
         // Navigation properties
-        public ICollection<FamiliarAbility> Abilities { get; set; } = new List<FamiliarAbility>();
+        public Familiar Familiar { get; set; } = null!;
         public ICollection<Build> Builds { get; set; } = new List<Build>();
     }
 }
