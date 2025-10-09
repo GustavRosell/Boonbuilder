@@ -1,24 +1,29 @@
 # BoonBuilder V2: Game-Authentic Redesign Plan
 
-**Status**: 🚧 In Development
+**Status**: 🔄 Active Development - Phase 2 (UI Implementation)
 **Strategy**: UI-First with Parallel Development (Non-Destructive)
 **Created**: 2025-10-08
+**Last Major Update**: 2025-10-09
+**Progress**: Phase 1 Complete, Phase 2 ~60% Complete
 
 ---
 
 ## 📋 Table of Contents
 1. [Overview](#overview)
-2. [Architecture Changes](#architecture-changes)
-3. [God Categorization System](#god-categorization-system)
-4. [Core vs Non-Core Boon System](#core-vs-non-core-boon-system)
-5. [UI Components](#ui-components)
-6. [Implementation Phases](#implementation-phases)
-7. [Data Structure Templates](#data-structure-templates)
-8. [Mock Data Structure](#mock-data-structure)
-9. [Backend Integration Guide](#backend-integration-guide)
-10. [Progress Checklist](#progress-checklist)
-11. [Technical Decisions](#technical-decisions)
-12. [Rollback Strategy](#rollback-strategy)
+2. [Recent Progress](#recent-progress)
+3. [Session History](#session-history)
+4. [Architecture Changes](#architecture-changes)
+5. [God Categorization System](#god-categorization-system)
+6. [Core vs Non-Core Boon System](#core-vs-non-core-boon-system)
+7. [UI Components](#ui-components)
+8. [Implementation Phases](#implementation-phases)
+9. [Data Structure Templates](#data-structure-templates)
+10. [Mock Data Structure](#mock-data-structure)
+11. [Backend Integration Guide](#backend-integration-guide)
+12. [Progress Checklist](#progress-checklist)
+13. [Technical Decisions](#technical-decisions)
+14. [Immediate Next Steps](#immediate-next-steps)
+15. [Rollback Strategy](#rollback-strategy)
 
 ---
 
@@ -39,6 +44,117 @@ Transform BoonBuilder to match Hades II's actual in-game UI with proper god cate
 **Phase 2**: Backend model updates (while gathering real game data)
 **Phase 3**: Integration and data seeding
 **Phase 4**: Polish and production switch
+
+---
+
+## Recent Progress
+
+### ✅ Phase 1: Documentation & Mock Data (Complete)
+- ✅ Created comprehensive REDESIGN_PLAN.md
+- ✅ Created `mockBoonData.ts` with god categorization system
+- ✅ Defined data structure templates for backend integration
+- ✅ Established 22-god system (9 Core, 3 Non-Standard, 4 NPC, 6 Allies)
+
+### 🔄 Phase 2: UI Implementation (~60% Complete)
+
+**Completed Components:**
+- ✅ **BoonBuilderV2.tsx**: Main container with three-column layout
+  - Loadout Panel (left) | Radial Menu/List (center) | Details + Controls (right)
+  - God categorization in radial menu (Core, Non-Standard, NPC, Allies)
+  - Sample non-core boons display
+  - Duo and legendary boon sections with availability tracking
+
+- ✅ **BuildControlsPanel.tsx**: Build metadata and actions
+  - Build name and description (300 character limit)
+  - Favorites toggle
+  - Tier selection (S/A/B/C/D)
+  - Difficulty selection (Easy/Medium/Hard/Expert)
+  - Save build button
+  - Quick stats display
+
+- ✅ **BoonDetailsPanel.tsx**: Interactive boon information display
+  - Hover-based boon preview
+  - **Pin/Highlight System** (Major Feature):
+    - Click any boon to pin it
+    - Purple glow visual feedback on pinned boons
+    - Hover temporarily overrides pinned display
+    - Return to pinned boon when hover ends
+    - "Clear Selection" button (always at bottom)
+  - Comprehensive boon information (description, effect, status, element)
+  - Duo/Legendary collaboration display
+
+- ✅ **AvailableSpecialBoonsIndicator.tsx**: Duo/Legendary availability alerts
+  - Expandable notification panel
+  - Shows eligible duo and legendary boons
+  - Visual indicators for prerequisite fulfillment
+
+- ✅ **ImageWithFallback.tsx**: Robust image loading component
+  - 1-second timeout to prevent infinite loading
+  - Fallback chain: .webp → .png → .svg → icon
+  - Proper positioning with flexbox layout
+  - Loading spinner with smooth transitions
+
+**In Progress / Pending:**
+- 🔲 **LoadoutPanelV2**: Needs game-authentic styling refactor
+  - Current: Basic two-column layout
+  - Needed: Hades II screenshot-accurate styling with greyed-out empty slots
+
+- 🔲 **DualRadialMenu System**: Separate radial menus for core vs non-core
+  - Current: Single radial menu with god categories
+  - Needed: Side-by-side or tabbed core/non-core radial interface
+
+- 🔲 **ViewToggle Component**: Switch between radial and list views
+  - Needed: Toggle button above selection area
+  - List view for grid-based boon browsing
+
+### 🔲 Phase 3-8: Not Started
+- Backend model updates
+- Data gathering and seeding
+- Backend integration
+- Polish and testing
+- Production deployment
+
+---
+
+## Session History
+
+### October 9, 2025: Pin/Highlight System & UX Polish
+
+**Major Feature: Boon Pin/Highlight Functionality**
+- Implemented click-to-pin system for all boon types (core, non-core, duo, legendary)
+- Added purple glow visual feedback (`bg-purple-600/30, border-purple-500/70, shadow-lg`)
+- Hover temporarily shows different boon, returns to pinned when hover ends
+- "Clear Selection" button in BoonDetailsPanel (always visible at bottom)
+- Updated `isPinned` logic: `!!pinnedBoon && (!hoveredBoon || (hoveredBoon.boonId === pinnedBoon.boonId))`
+
+**BuildControlsPanel Improvements:**
+- Character limit increase: 180 → 300 characters
+- Description textarea expanded: 3 rows → 6 rows
+- Centered labels using flexbox layout
+- Character counter moved to top-right with color warning (yellow at 300)
+- Removed redundant "Build description" label
+
+**UI Refinements:**
+- Replaced "Boon Selection" text with boon logo image (`/images/Other/boon_logo.webp`)
+- Completely removed scrollbar while maintaining scroll functionality
+  - Applied to all scrollable areas via `index.css`
+  - Uses `scrollbar-width: none` and `::-webkit-scrollbar { width: 0 }`
+
+**ImageWithFallback Fixes:**
+- Reduced timeout from 3 seconds → 1 second for better hover responsiveness
+- Fixed positioning issues with loading spinner
+- Outer container properly inherits sizing classes
+- Loading overlay uses `absolute inset-0` without className inheritance
+- Relative spinner size (`w-1/3 h-1/3`) with max constraints
+
+**TypeScript Type Fixes:**
+- Updated `hoveredBoon` state type: `Boon | null` → `Boon | AvailableBoon | null`
+- Resolved type mismatch errors when hovering over duo/legendary boons
+
+**BoonDetailsPanel Layout:**
+- Restructured with flexbox for pinned bottom button
+- Scrollable content area with fixed "Clear Selection" button at bottom
+- Button always visible regardless of content length
 
 ---
 
@@ -729,20 +845,24 @@ export interface BuildState {
 
 ## Progress Checklist
 
-### Phase 1: Documentation ✅ (In Progress)
+### Phase 1: Documentation ✅ (Complete)
 - [x] Create REDESIGN_PLAN.md
-- [ ] Create mockBoonData.ts
-- [ ] Create data collection templates for user
+- [x] Create mockBoonData.ts
+- [x] Create data collection templates for user
 
-### Phase 2: UI with Mock Data 🔲
-- [ ] Create BoonBuilderV2.tsx container
-- [ ] Create LoadoutPanelV2.tsx
-- [ ] Create DualRadialMenu.tsx
-- [ ] Create CoreBoonRadial.tsx
-- [ ] Create NonCoreBoonRadial.tsx
-- [ ] Create ViewToggle.tsx
-- [ ] Add route to sidebar
-- [ ] Test all UI flows
+### Phase 2: UI with Mock Data 🔄 (~60% Complete)
+- [x] Create BoonBuilderV2.tsx container
+- [x] Create BuildControlsPanel.tsx
+- [x] Create BoonDetailsPanel.tsx (with pin/highlight functionality)
+- [x] Create AvailableSpecialBoonsIndicator.tsx
+- [x] Implement god categorization in radial menu
+- [x] Implement sample non-core boons display
+- [x] Add duo/legendary availability tracking
+- [ ] Refactor LoadoutPanel with game-authentic styling
+- [ ] Create DualRadialMenu.tsx (separate core/non-core radials)
+- [ ] Create ViewToggle.tsx (radial ↔ list)
+- [ ] Add route to sidebar (currently accessible, needs nav item)
+- [ ] Test all UI flows comprehensively
 
 ### Phase 3: Backend Models 🔲
 - [ ] Add GodType enum to backend
@@ -880,6 +1000,124 @@ nonCoreBoons: Boon[]             // Array of passive/special boons
 
 ---
 
+## Immediate Next Steps
+
+### 🎯 Priority 1: LoadoutPanel Refactor (Next Session)
+**Goal**: Create game-authentic loadout display matching Hades II screenshot
+
+**Tasks**:
+- Refactor current basic two-column layout
+- Add greyed-out empty slot templates (weapon, familiar, core boons)
+- Match Hades II visual styling (borders, spacing, backgrounds)
+- Implement slot hover states
+- Add visual feedback for empty vs filled slots
+- Ensure responsive layout for different screen sizes
+
+**Reference**: Use provided Hades II screenshot as design specification
+
+---
+
+### 🎯 Priority 2: Dual Radial Menu System (Following Session)
+**Goal**: Separate radial menus for core vs non-core boon selection
+
+**Tasks**:
+- Create `DualRadialMenu.tsx` wrapper component
+- **Option A (Side-by-Side)**:
+  - Left radial: Core boons (slot → god → boon flow)
+  - Right radial: Non-core boons (category → god → boon flow)
+- **Option B (Tabbed)**:
+  - Single radial with tab switcher
+  - "Core Boons" tab vs "Non-Core Boons" tab
+- Implement state management for dual selection contexts
+- Add visual indicators for which radial is active
+- Test navigation flows for both radials
+
+**Decision Point**: Side-by-side vs tabbed approach (user preference)
+
+---
+
+### 🎯 Priority 3: View Toggle Component
+**Goal**: Switch between radial menu and list/grid view
+
+**Tasks**:
+- Create `ViewToggle.tsx` component
+- Add toggle button above selection area (🔄 icon or text button)
+- **Radial View**: Current radial menu system
+- **List View**: Grid-based boon browsing with filters
+- Persist view preference in local storage
+- Smooth transition animation between views
+
+---
+
+### 🔧 Priority 4: Polish & UX Enhancements
+
+**Error Handling:**
+- Add error popups for invalid selections
+- Validation dialogs for incomplete builds
+- Connection error handling for API calls
+- User-friendly error messages
+
+**Helper System:**
+- Add tooltip components for complex features
+- Question mark (?) icons with explanations
+- Onboarding guide for first-time users
+- Keyboard shortcut hints
+
+**Layout Optimization:**
+- Compact view toggle for loadout panel
+- Resize radial menu area dynamically
+- Maximize radial menu space when needed
+- Responsive breakpoints for different screen sizes
+
+---
+
+### 🔮 Future Features (Post-Phase 2)
+
+**Keepsakes System:**
+- Add keepsake selection panel
+- Keepsake effects display
+- Integration with build state
+- Visual indicators for equipped keepsakes
+
+**Arcana Cards:**
+- Arcana card selection interface
+- Passive bonus display
+- Build synergy calculations
+- Arcana deck builder
+
+**Additional Enhancements:**
+- Build import/export functionality
+- Share build via URL
+- Community build ratings
+- Build comparison tool
+- Build templates and presets
+
+---
+
+### 📅 Suggested Timeline
+
+**Week 1 (Current):**
+- ✅ Pin/highlight system (completed)
+- ✅ UI polish and refinements (completed)
+- 🔲 LoadoutPanel refactor
+
+**Week 2:**
+- 🔲 Dual radial menu system
+- 🔲 View toggle component
+- 🔲 Error handling and validation
+
+**Week 3:**
+- 🔲 Helper system and tooltips
+- 🔲 Layout optimization
+- 🔲 Comprehensive testing
+
+**Week 4:**
+- 🔲 Backend integration preparation
+- 🔲 Data gathering (user-led)
+- 🔲 Production readiness assessment
+
+---
+
 ## Rollback Strategy
 
 ### If V2 Needs to be Reverted
@@ -918,28 +1156,36 @@ nonCoreBoons: Boon[]             // Array of passive/special boons
 
 ## Next Steps
 
-### Immediate Actions (Now)
+### Immediate Actions (Completed ✅)
 1. ✅ Complete this document
-2. 🔲 Create `mockBoonData.ts` with placeholder gods/boons
-3. 🔲 Create `BoonBuilderV2.tsx` with dual radial layout
-4. 🔲 Wire up new route in sidebar
+2. ✅ Create `mockBoonData.ts` with placeholder gods/boons
+3. ✅ Create `BoonBuilderV2.tsx` with radial layout and god categorization
+4. ✅ Implement BuildControlsPanel and BoonDetailsPanel
+5. ✅ Add pin/highlight functionality for boons
 
-### Short-Term (Next 1-2 Days)
-1. 🔲 Build out radial menu components with mock data
-2. 🔲 Create game-authentic loadout panel
-3. 🔲 Test all UI flows visually
-4. 🔲 Share prototype with user for feedback
+### Current Sprint (This Week)
+1. 🎯 Refactor LoadoutPanel with game-authentic Hades II styling
+2. 🎯 Create DualRadialMenu system (core vs non-core)
+3. 🎯 Add ViewToggle component (radial ↔ list)
+4. 🎯 Implement error popups and validation dialogs
+5. 🎯 Add helper tooltips and guide system
 
-### Medium-Term (Next Week)
+### Next Sprint (Following Week)
+1. 🔲 Layout optimization and compact view toggle
+2. 🔲 Comprehensive UI testing and bug fixes
+3. 🔲 Wire up route in sidebar navigation
+4. 🔲 Performance optimization and polish
+
+### Phase 3: Backend Integration (Future)
 1. 🔲 User gathers complete game data for 13 gods
-2. 🔲 Implement backend model changes
+2. 🔲 Implement backend model changes (GodType enum)
 3. 🔲 Seed database with real data
-4. 🔲 Connect UI to real API
+4. 🔲 Connect UI to real API endpoints
 
-### Long-Term (Next 2-3 Weeks)
-1. 🔲 Polish and testing
+### Phase 4: Production (Future)
+1. 🔲 Cross-browser and device testing
 2. 🔲 Production deployment
-3. 🔲 Documentation updates
+3. 🔲 Documentation updates (CLAUDE.md, API.md, CHANGELOG.md)
 4. 🔲 User feedback and iteration
 
 ---
@@ -947,20 +1193,27 @@ nonCoreBoons: Boon[]             // Array of passive/special boons
 ## Questions & Notes
 
 ### Open Questions
-1. **View Toggle**: Should List view replace radial or show alongside?
-2. **Naming**: "BoonBuilder V2" or different name for new page?
+1. **Dual Radial**: Side-by-side or tabbed interface for core/non-core menus?
+2. **View Toggle**: Should List view replace radial or show alongside?
 3. **Migration**: Deprecate old Creator or keep both long-term?
-4. **Non-Core Display**: Grid, list, or carousel for non-core boons?
+4. **Keepsakes/Arcana**: Integration timeline and priority?
 
 ### Notes for User
 - **Data Format**: Use templates in "Data Structure Templates" section
 - **Images**: Verify all icon paths match your asset structure
-- **Priority**: Focus on Core/NonStandard gods first (12 gods, 150+ boons)
-- **Testing**: Provide sample data for 1-2 gods per category for early testing
+- **Priority**: Focus on completing Phase 2 UI before backend integration
+- **Testing**: Test each component thoroughly before moving to next
+- **Keepsakes/Arcana**: Plan for post-Phase 2 integration
+
+### Recent Decisions
+- ✅ Pin/highlight system implemented for better UX
+- ✅ Scrollbar completely hidden for cleaner aesthetic
+- ✅ Character limit increased to 300 for detailed build descriptions
+- ✅ Image loading timeout reduced to 1s for better responsiveness
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-10-08
+**Document Version**: 2.0
+**Last Updated**: 2025-10-09
 **Author**: Claude Code
-**Status**: Living Document (update as implementation progresses)
+**Status**: Living Document (actively maintained during development)

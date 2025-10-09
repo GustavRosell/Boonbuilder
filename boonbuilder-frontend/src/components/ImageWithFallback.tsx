@@ -24,6 +24,21 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     setIsLoading(true);
   }, [src]);
 
+  // Add timeout to prevent infinite loading (1 second for quick hover feedback)
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        // If still loading after 1 second, show fallback
+        setImageError(true);
+        setIsLoading(false);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [isLoading]);
+
   const handleImageError = () => {
     // Try fallback chain: .webp → .png → .svg
     if (currentSrc.endsWith('.webp')) {
@@ -52,26 +67,25 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   if (imageError) {
     // Fallback to icon/emoji when image fails to load
     return (
-      <div className={`flex items-center justify-center bg-purple-600 text-white ${className}`}>
-        <span className="text-2xl">{fallbackIcon}</span>
+      <div className={`flex items-center justify-center bg-purple-600/30 text-white ${className}`}>
+        <span className="text-2xl opacity-50">{fallbackIcon}</span>
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       {isLoading && (
-        <div className={`absolute inset-0 flex items-center justify-center bg-purple-600/50 ${className}`}>
-          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center bg-purple-600/30 rounded">
+          <div className="w-1/3 h-1/3 max-w-[24px] max-h-[24px] border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
       <img
         src={currentSrc}
         alt={alt}
-        className={className}
+        className={`w-full h-full ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
         onError={handleImageError}
         onLoad={handleImageLoad}
-        style={{ display: isLoading ? 'none' : 'block' }}
       />
     </div>
   );

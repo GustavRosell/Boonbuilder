@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 BoonBuilder is a Hades II build creator application with a .NET 9 Web API backend and React TypeScript frontend. It allows users to create, share, and browse game builds using an interactive radial menu interface.
 
+**Active Development:** BoonBuilderV2 redesign is currently in Phase 2 (UI Implementation, ~60% complete). See `@docs/REDESIGN_PLAN.md` for comprehensive redesign documentation, progress tracking, and implementation details.
+
 ## Documentation-First Development Workflow
 
 **CRITICAL**: Always use the comprehensive documentation in `@docs\` as context before making any changes:
@@ -104,11 +106,26 @@ BoonBuilder/
 - **Services/**: Business logic layer (BoonService, BuildService) with interface abstractions
 
 ### Frontend Structure (React TypeScript)
+
+**Original BoonBuilder (v1):**
 - **components/BoonBuilder.tsx**: Main application component with sidebar navigation and state management
 - **components/LoadoutPanel.tsx**: Extracted loadout display with 640px width and two-column layout (Main Loadout + Special Boons)
 - **components/LoadoutSlot.tsx**: Reusable slot component for weapon, familiar, and boon displays with template image support
 - **components/RadialMenu.tsx**: Interactive circular menu for weapon/familiar/boon selection with complex state flow including familiar integration
-- **components/ImageWithFallback.tsx**: Image component with loading state management and useEffect prop change handling
+
+**BoonBuilderV2 (Active Development - Phase 2):**
+- **components/BoonBuilderV2.tsx**: Redesigned main container with three-column layout (Loadout | Radial/List | Details + Controls)
+  - God categorization: Core Gods, Non-Standard Gods, NPC Gods, Allies (22 gods total)
+  - Separate core vs non-core boon systems
+  - Mock data integration via `data/mockBoonData.ts`
+- **components/BuildControlsPanel.tsx**: Build metadata (name, description, tier, difficulty, favorites)
+- **components/BoonDetailsPanel.tsx**: Hover/pin-based boon information with "Clear Selection" button
+  - **Pin/Highlight System**: Click to pin boons with purple glow, hover override, persistent display
+- **components/AvailableSpecialBoonsIndicator.tsx**: Duo/Legendary availability notifications
+- **data/mockBoonData.ts**: 22-god mock data system with god categorization enum
+
+**Shared Components:**
+- **components/ImageWithFallback.tsx**: Image component with 1s timeout, .webp→.png→.svg→icon fallback chain
 - **types/index.ts**: TypeScript definitions exactly matching backend models and enums, including Familiar interface
 - **services/api.ts**: Axios-based API client with full CRUD operations and error handling
 - **utils/boonPrerequisites.ts**: Complex prerequisite validation logic for duo/legendary boons
@@ -242,6 +259,7 @@ npm install
 - **[docs/ADR.md](docs/ADR.md)**: Architectural decisions and technical rationale
 - **[docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)**: Development guidelines, workflows, and coding standards
 - **[docs/API.md](docs/API.md)**: Complete API documentation with examples and data models
+- **[docs/REDESIGN_PLAN.md](docs/REDESIGN_PLAN.md)**: BoonBuilderV2 redesign plan, progress, and session history
 - **[IMAGE_GUIDE.md](IMAGE_GUIDE.md)**: Asset replacement workflow and image management
 
 ### Documentation Maintenance Guidelines
@@ -303,5 +321,42 @@ This documentation-first approach ensures comprehensive project context, facilit
 ### Asset Management Workflow
 - **Template Images**: Store empty slot templates in `/public/images/slots/` (weapon.png, familiar.png, etc.)
 - **Game Assets**: Organized by type in `/public/images/` subdirectories (boons, gods, weapons, aspects, familiars)
-- **Fallback Strategy**: ImageWithFallback component handles .webp → .svg → icon fallback chain
+- **Fallback Strategy**: ImageWithFallback component handles .webp → .png → .svg → icon fallback chain with 1s timeout
 - **Asset Integration**: LoadoutSlot component uses template images for empty state display
+
+## BoonBuilderV2 Development
+
+**Status:** Phase 2 (UI Implementation) - ~60% Complete
+**Documentation:** See `@docs/REDESIGN_PLAN.md` for complete details
+
+### Key V2 Features
+- **God Categorization System**: 22 gods across 4 categories (Core, Non-Standard, NPC, Allies)
+- **Core vs Non-Core Boon Separation**: Different selection flows for slot-based vs passive boons
+- **Pin/Highlight System**: Click-to-pin boons with visual feedback and hover override
+- **Three-Column Layout**: Loadout | Radial Menu/List View | Details + Controls
+- **Mock Data Development**: UI-first approach using `data/mockBoonData.ts` (no backend changes yet)
+
+### V2 Components
+- **BoonBuilderV2.tsx**: Main container with state management for core/non-core boons
+- **BuildControlsPanel.tsx**: Tier, difficulty, favorites, and 300-char description
+- **BoonDetailsPanel.tsx**: Interactive boon details with pin system and Clear button (always at bottom)
+- **AvailableSpecialBoonsIndicator.tsx**: Duo/Legendary prerequisite notifications
+
+### V2 Pending Work
+- LoadoutPanel refactor with game-authentic Hades II styling
+- DualRadialMenu system (separate core/non-core radials)
+- ViewToggle component (radial ↔ list view)
+- Error popups and validation dialogs
+- Helper tooltips and guide system
+
+### Future V2 Features
+- **Keepsakes System**: Build enhancement items integration
+- **Arcana Cards**: Passive bonus selection interface
+- **Backend Integration**: GodType enum, model updates, real game data seeding
+
+### V2 Session History (October 9, 2025)
+- Implemented pin/highlight functionality for all boon types
+- BuildControlsPanel improvements (char limit, layout, centering)
+- Scrollbar completely hidden while maintaining scroll functionality
+- ImageWithFallback timeout optimization (3s → 1s)
+- BoonDetailsPanel Clear button pinned to bottom with flexbox layout
