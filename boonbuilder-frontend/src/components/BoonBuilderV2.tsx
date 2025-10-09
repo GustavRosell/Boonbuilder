@@ -28,19 +28,74 @@ import {
 } from '../types';
 import {
   mockNonCoreBoons,
+  mockGods,
   GodType,
   getGodsByType
 } from '../data/mockBoonData';
+import { Keepsake } from '../data/mockKeepsakes';
+import { ArcanaCard, calculateTotalGrasp, DEFAULT_MAX_GRASP } from '../data/mockArcanaCards';
 import BuildControlsPanel from './BuildControlsPanel';
 import BoonDetailsPanel from './BoonDetailsPanel';
 import ImageWithFallback from './ImageWithFallback';
+import LoadoutPanelV2 from './LoadoutPanelV2';
+import KeepsakeModal from './KeepsakeModal';
+import ArcanaCardModal from './ArcanaCardModal';
+import EnhancedRadialMenu from './EnhancedRadialMenu';
+import ParticleField from './ParticleField';
+
+// ============================================================================
+// MOCK CORE BOONS (TEMPORARY - FOR RADIAL MENU TESTING)
+// ============================================================================
+
+/**
+ * Temporary mock core boons for testing the radial menu
+ * TODO: Replace with real data from backend once available
+ */
+const mockCoreBoons: Boon[] = [
+  // Zeus Attack
+  { boonId: 1001, name: "Lightning Strike", type: 0, godId: 9, slot: BoonSlot.Attack, description: "Your Attack jolts foes", effect: "+40% damage", iconUrl: "/images/boons/Olympian_Gods/zeus/other/Zeus_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 9) },
+  // Zeus Special
+  { boonId: 1002, name: "Thunder Flourish", type: 0, godId: 9, slot: BoonSlot.Special, description: "Your Special jolts foes", effect: "+50% damage", iconUrl: "/images/boons/Olympian_Gods/zeus/other/Zeus_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 9) },
+  // Aphrodite Attack
+  { boonId: 1003, name: "Passion Dash", type: 0, godId: 1, slot: BoonSlot.Attack, description: "Your Attack inflicts Weak", effect: "+35% damage", iconUrl: "/images/boons/Olympian_Gods/aphrodite/other/Aphrodite_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 1) },
+  // Aphrodite Special
+  { boonId: 1004, name: "Passion Flare", type: 0, godId: 1, slot: BoonSlot.Special, description: "Your Special inflicts Weak", effect: "+45% damage", iconUrl: "/images/boons/Olympian_Gods/aphrodite/other/Aphrodite_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 1) },
+  // Apollo Attack
+  { boonId: 1005, name: "Nova Strike", type: 0, godId: 2, slot: BoonSlot.Attack, description: "Your Attack can Daze foes", effect: "+38% damage", iconUrl: "/images/boons/Olympian_Gods/apollo/other/Apollo_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 2) },
+  // Apollo Cast
+  { boonId: 1006, name: "Lucid Beam", type: 0, godId: 2, slot: BoonSlot.Cast, description: "Your Cast seeks foes", effect: "Homing projectile", iconUrl: "/images/boons/Olympian_Gods/apollo/other/Apollo_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 2) },
+  // Hephaestus Special
+  { boonId: 1007, name: "Volcanic Flourish", type: 0, godId: 5, slot: BoonSlot.Special, description: "Your Special causes explosions", effect: "+60% Blast damage", iconUrl: "/images/boons/Olympian_Gods/hephaestus/other/Hephaestus_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 5) },
+  // Poseidon Attack
+  { boonId: 1008, name: "Tempest Strike", type: 0, godId: 8, slot: BoonSlot.Attack, description: "Your Attack knocks foes away", effect: "+42% damage + knockback", iconUrl: "/images/boons/Olympian_Gods/poseidon/other/Poseidon_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 8) },
+  // Demeter Cast
+  { boonId: 1009, name: "Frost Strike", type: 0, godId: 4, slot: BoonSlot.Cast, description: "Your Cast inflicts Chill", effect: "Slows enemies", iconUrl: "/images/boons/Olympian_Gods/demeter/other/Demeter_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 4) },
+  // Hera Sprint
+  { boonId: 1010, name: "Royal Dash", type: 0, godId: 6, slot: BoonSlot.Sprint, description: "Your Sprint inflicts Hitch", effect: "Spreads damage", iconUrl: "/images/boons/Olympian_Gods/hera/other/Hera_Logo.png", isPassive: false, god: mockGods.find(g => g.godId === 6) },
+];
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
 /**
- * Extended BuildState with core/non-core separation
+ * Keepsake selection with rank
+ */
+interface KeepsakeSelection {
+  keepsake: Keepsake;
+  rank: number; // 1-4 (4 = Heroic)
+}
+
+/**
+ * Arcana Card selection with rank
+ */
+interface ArcanaCardSelection {
+  card: ArcanaCard;
+  rank: number; // 1-4
+}
+
+/**
+ * Extended BuildState with core/non-core separation, Keepsakes, and Arcana Cards
  */
 interface BuildStateV2 {
   weapon?: Weapon;
@@ -51,6 +106,9 @@ interface BuildStateV2 {
   nonCoreBoons: Boon[];                 // Array of non-core boons
   duoBoons: AvailableBoon[];
   legendaryBoons: AvailableBoon[];
+  keepsake: KeepsakeSelection | null;   // Single keepsake with rank
+  arcanaCards: ArcanaCardSelection[];   // Multiple arcana cards with ranks
+  maxGrasp: number;                     // Adjustable Grasp limit (10-30)
   name: string;
   description: string;
   isFavorite: boolean;
@@ -80,6 +138,9 @@ const BoonBuilderV2: React.FC = () => {
     nonCoreBoons: [],
     duoBoons: [],
     legendaryBoons: [],
+    keepsake: null,
+    arcanaCards: [],
+    maxGrasp: DEFAULT_MAX_GRASP,
     name: '',
     description: '',
     isFavorite: false,
@@ -90,6 +151,10 @@ const BoonBuilderV2: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('radial');
   const [hoveredBoon, setHoveredBoon] = useState<Boon | AvailableBoon | null>(null);
   const [pinnedBoon, setPinnedBoon] = useState<Boon | AvailableBoon | null>(null);
+
+  // Modal states
+  const [isKeepsakeModalOpen, setIsKeepsakeModalOpen] = useState(false);
+  const [isArcanaModalOpen, setIsArcanaModalOpen] = useState(false);
 
   // Available special boons (for prerequisite checking - will be populated when backend is ready)
   const [availableDuoBoons, setAvailableDuoBoons] = useState<AvailableBoon[]>([]);
@@ -139,6 +204,12 @@ const BoonBuilderV2: React.FC = () => {
 
   // ========== HANDLERS ==========
 
+  const handleSelectCoreBoon = (slot: BoonSlot, boon: Boon) => {
+    const newCoreBoons = new Map(selectedBuild.coreBoons);
+    newCoreBoons.set(slot, boon);
+    setSelectedBuild({ ...selectedBuild, coreBoons: newCoreBoons });
+  };
+
   const handleRemoveCoreBoon = (slot: BoonSlot) => {
     const newCoreBoons = new Map(selectedBuild.coreBoons);
     newCoreBoons.delete(slot);
@@ -174,6 +245,16 @@ const BoonBuilderV2: React.FC = () => {
   };
 
   const handleSaveBuild = () => {
+    // Validate Grasp limit
+    const currentGrasp = calculateTotalGrasp(selectedBuild.arcanaCards.map(s => s.card));
+    if (currentGrasp > selectedBuild.maxGrasp) {
+      alert(
+        `Cannot save build: Your Arcana Cards use ${currentGrasp} Grasp, ` +
+        `but your limit is ${selectedBuild.maxGrasp}. Please reduce your Grasp usage or increase your limit.`
+      );
+      return;
+    }
+
     console.log('Saving build:', selectedBuild);
     // TODO: Implement actual save logic
     alert('Build save functionality coming soon!');
@@ -185,6 +266,19 @@ const BoonBuilderV2: React.FC = () => {
 
   const handleClearPin = () => {
     setPinnedBoon(null);
+  };
+
+  // Keepsake & Arcana handlers
+  const handleSelectKeepsake = (selection: KeepsakeSelection | null) => {
+    setSelectedBuild({ ...selectedBuild, keepsake: selection });
+  };
+
+  const handleSelectArcanaCards = (selections: ArcanaCardSelection[]) => {
+    setSelectedBuild({ ...selectedBuild, arcanaCards: selections });
+  };
+
+  const handleMaxGraspChange = (maxGrasp: number) => {
+    setSelectedBuild({ ...selectedBuild, maxGrasp });
   };
 
   // ========== RENDER ==========
@@ -215,214 +309,36 @@ const BoonBuilderV2: React.FC = () => {
           <div className="grid grid-cols-[680px_1fr_460px] gap-4 h-full">
 
             {/* ===== COLUMN 1: LOADOUT PANEL ===== */}
-            <div className="bg-gray-900/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4 h-full overflow-auto">
-              <h2 className="text-xl font-bold text-purple-300 mb-3 text-center">Loadout</h2>
-
-              <div className="grid grid-cols-2 gap-3 h-[calc(100%-3rem)]">
-                {/* LEFT COLUMN: Weapon + Familiar + Core Boons */}
-                <div className="space-y-3 flex flex-col">
-
-                  {/* Weapon Slot */}
-                  <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/50">
-                    <div className="text-xs text-gray-400 mb-1">Weapon</div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded bg-gray-700/30 border border-gray-600/50 flex items-center justify-center">
-                        <img src="/images/slots/weapon.webp" alt="Empty weapon" className="w-10 h-10 object-cover rounded opacity-30" />
-                      </div>
-                      <div className="flex-1 text-xs text-gray-500">No Weapon</div>
-                    </div>
-                  </div>
-
-                  {/* Familiar Slot */}
-                  <div className="bg-gray-800/40 rounded-lg p-2 border border-gray-700/50">
-                    <div className="text-xs text-gray-400 mb-1">Familiar</div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 rounded bg-gray-700/30 border border-gray-600/50 flex items-center justify-center">
-                        <img src="/images/slots/familiar.png" alt="Empty familiar" className="w-10 h-10 object-cover rounded opacity-30" />
-                      </div>
-                      <div className="flex-1 text-xs text-gray-500">No Familiar</div>
-                    </div>
-                  </div>
-
-                  {/* Core Boon Slots - Compact */}
-                  <div className="bg-gray-800/20 rounded-lg p-3 flex-1">
-                    <div className="text-sm text-gray-400 mb-2">Core Boons</div>
-                    <div className="space-y-1.5">
-                      {[
-                        { slot: BoonSlot.Attack, label: 'Attack', image: 'attack.png' },
-                        { slot: BoonSlot.Special, label: 'Special', image: 'special.png' },
-                        { slot: BoonSlot.Cast, label: 'Cast', image: 'cast.png' },
-                        { slot: BoonSlot.Sprint, label: 'Sprint', image: 'sprint.png' },
-                        { slot: BoonSlot.Magick, label: 'Magick', image: 'magick.png' }
-                      ].map(({ slot, label, image }) => {
-                        const boon = selectedBuild.coreBoons.get(slot);
-                        return (
-                          <div
-                            key={slot}
-                            className={`flex items-center gap-1.5 p-1.5 rounded cursor-pointer transition-all ${
-                              boon && isBoonPinned(boon)
-                                ? 'bg-purple-600/30 border-2 border-purple-500/70 shadow-lg shadow-purple-500/20'
-                                : 'bg-gray-700/20 border border-gray-600/30 hover:bg-gray-600/30'
-                            }`}
-                            onClick={() => boon && handlePinBoon(boon)}
-                          >
-                            <div className="w-10 h-10 rounded bg-gray-700/50 border border-gray-600/50 flex items-center justify-center">
-                              {boon ? (
-                                <img src={boon.iconUrl} alt={boon.name} className="w-8 h-8 object-cover rounded" />
-                              ) : (
-                                <img src={`/images/slots/${image}`} alt={`Empty ${label}`} className="w-8 h-8 object-cover rounded opacity-20 grayscale" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-[10px] text-gray-400">{slotDisplayNames[slot]}</div>
-                              {boon ? (
-                                <div className="text-xs text-white truncate">{boon.name}</div>
-                              ) : (
-                                <div className="text-xs text-gray-600 italic">Empty</div>
-                              )}
-                            </div>
-                            {boon && (
-                              <button
-                                onClick={() => handleRemoveCoreBoon(slot)}
-                                className="text-xs text-red-400 hover:text-red-300 px-1"
-                              >
-                                ×
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* RIGHT COLUMN: Non-Core + Duo + Legendary */}
-                <div className="space-y-3 flex flex-col">
-
-                  {/* Non-Core Boons Pool */}
-                  <div className="bg-gray-800/20 rounded-lg p-3 max-h-[180px] overflow-auto">
-                    <div className="text-sm text-gray-400 mb-2">Non-Core ({selectedBuild.nonCoreBoons.length})</div>
-                    {selectedBuild.nonCoreBoons.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {selectedBuild.nonCoreBoons.map(boon => (
-                          <div key={boon.boonId} className="relative group">
-                            <div
-                              className={`w-full aspect-square rounded p-0.5 flex items-center justify-center cursor-pointer transition-all ${
-                                isBoonPinned(boon)
-                                  ? 'bg-purple-600/30 border-2 border-purple-500/70 shadow-lg shadow-purple-500/20'
-                                  : 'bg-gray-700/30 border border-gray-600/50 hover:bg-gray-600/40'
-                              }`}
-                              onMouseEnter={() => setHoveredBoon(boon)}
-                              onMouseLeave={() => setHoveredBoon(null)}
-                              onClick={() => handlePinBoon(boon)}
-                            >
-                              <img src={boon.iconUrl} alt={boon.name} className="w-full h-full object-cover rounded" />
-                            </div>
-                            <button
-                              onClick={() => handleRemoveNonCoreBoon(boon.boonId)}
-                              className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center h-16 text-gray-600 text-xs italic">
-                        None
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Duo Boons */}
-                  <div className={`rounded-lg p-3 border transition-all ${
-                    eligibleDuoCount > 0
-                      ? 'bg-yellow-900/20 border-yellow-500/50 shadow-lg shadow-yellow-500/20'
-                      : selectedBuild.duoBoons.length > 0
-                      ? 'bg-yellow-900/20 border-yellow-500/30'
-                      : 'bg-yellow-900/10 border-yellow-500/20'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-yellow-300 font-semibold">Duo ({selectedBuild.duoBoons.length})</div>
-                      {eligibleDuoCount > 0 && (
-                        <div className="text-xs text-green-400 font-semibold">+{eligibleDuoCount} available</div>
-                      )}
-                    </div>
-                    {selectedBuild.duoBoons.length > 0 ? (
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedBuild.duoBoons.map(d => (
-                          <div
-                            key={d.boonId}
-                            className={`w-10 h-10 rounded cursor-pointer transition-all ${
-                              isBoonPinned(d)
-                                ? 'bg-purple-600/30 border-2 border-purple-500/70 shadow-lg shadow-purple-500/20'
-                                : 'bg-yellow-900/30 border border-yellow-500/40 hover:border-yellow-500/70'
-                            }`}
-                            onMouseEnter={() => setHoveredBoon(d)}
-                            onMouseLeave={() => setHoveredBoon(null)}
-                            onClick={() => handlePinBoon(d)}
-                          >
-                            <img src={d.iconUrl} alt={d.name} className="w-full h-full object-cover rounded" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-600 italic py-2">None selected</div>
-                    )}
-                  </div>
-
-                  {/* Legendary Boons */}
-                  <div className={`rounded-lg p-3 border transition-all ${
-                    eligibleLegendaryCount > 0
-                      ? 'bg-orange-900/20 border-orange-500/50 shadow-lg shadow-orange-500/20'
-                      : selectedBuild.legendaryBoons.length > 0
-                      ? 'bg-orange-900/20 border-orange-500/30'
-                      : 'bg-orange-900/10 border-orange-500/20'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-orange-300 font-semibold">Legendary ({selectedBuild.legendaryBoons.length})</div>
-                      {eligibleLegendaryCount > 0 && (
-                        <div className="text-xs text-green-400 font-semibold">+{eligibleLegendaryCount} available</div>
-                      )}
-                    </div>
-                    {selectedBuild.legendaryBoons.length > 0 ? (
-                      <div className="flex gap-2 flex-wrap">
-                        {selectedBuild.legendaryBoons.map(l => (
-                          <div
-                            key={l.boonId}
-                            className={`w-10 h-10 rounded cursor-pointer transition-all ${
-                              isBoonPinned(l)
-                                ? 'bg-purple-600/30 border-2 border-purple-500/70 shadow-lg shadow-purple-500/20'
-                                : 'bg-orange-900/30 border border-orange-500/40 hover:border-orange-500/70'
-                            }`}
-                            onMouseEnter={() => setHoveredBoon(l)}
-                            onMouseLeave={() => setHoveredBoon(null)}
-                            onClick={() => handlePinBoon(l)}
-                          >
-                            <img src={l.iconUrl} alt={l.name} className="w-full h-full object-cover rounded" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-gray-600 italic py-2">None selected</div>
-                    )}
-                  </div>
-
-                  {/* Infusions */}
-                  <div className={`rounded-lg p-3 border transition-all bg-purple-900/10 border-purple-500/20`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-sm text-purple-300 font-semibold">Infusions (0)</div>
-                    </div>
-                    <div className="text-xs text-gray-600 italic py-2">None selected</div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
+            <LoadoutPanelV2
+              weapon={selectedBuild.weapon}
+              aspect={selectedBuild.aspect}
+              familiar={selectedBuild.familiar}
+              familiarAbility={selectedBuild.familiarAbility}
+              coreBoons={selectedBuild.coreBoons}
+              nonCoreBoons={selectedBuild.nonCoreBoons}
+              duoBoons={selectedBuild.duoBoons}
+              legendaryBoons={selectedBuild.legendaryBoons}
+              keepsake={selectedBuild.keepsake}
+              arcanaCards={selectedBuild.arcanaCards}
+              maxGrasp={selectedBuild.maxGrasp}
+              onRemoveWeapon={() => setSelectedBuild({ ...selectedBuild, weapon: undefined, aspect: undefined })}
+              onRemoveFamiliar={() => setSelectedBuild({ ...selectedBuild, familiar: undefined, familiarAbility: undefined })}
+              onRemoveCoreBoon={handleRemoveCoreBoon}
+              onRemoveNonCoreBoon={handleRemoveNonCoreBoon}
+              onRemoveDuoBoon={(boonId) => setSelectedBuild({ ...selectedBuild, duoBoons: selectedBuild.duoBoons.filter(b => b.boonId !== boonId) })}
+              onRemoveLegendaryBoon={(boonId) => setSelectedBuild({ ...selectedBuild, legendaryBoons: selectedBuild.legendaryBoons.filter(b => b.boonId !== boonId) })}
+              onPinBoon={handlePinBoon}
+              onOpenKeepsakeModal={() => setIsKeepsakeModalOpen(true)}
+              onOpenArcanaModal={() => setIsArcanaModalOpen(true)}
+              hoveredBoon={hoveredBoon}
+              pinnedBoon={pinnedBoon}
+              setHoveredBoon={setHoveredBoon}
+              eligibleDuoCount={eligibleDuoCount}
+              eligibleLegendaryCount={eligibleLegendaryCount}
+            />
 
             {/* ===== COLUMN 2: RADIAL/LIST VIEW ===== */}
-            <div className="bg-gray-900/60 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4 h-full overflow-hidden flex flex-col">
+            <div className="bg-gray-900/60 backdrop-blur-sm border-2 border-purple-500/30 rounded-xl p-4 h-full overflow-hidden flex flex-col">
 
               {/* View Toggle */}
               <div className="flex items-center mb-4">
@@ -431,7 +347,7 @@ const BoonBuilderV2: React.FC = () => {
                 <div className="flex-1 flex justify-end">
                   <button
                     onClick={handleToggleView}
-                    className="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 rounded-lg border border-purple-500/40 transition-colors text-xs text-purple-300 font-medium"
+                    className="px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 rounded-lg border-2 border-purple-500/40 transition-colors text-xs text-purple-300 font-medium"
                   >
                     {viewMode === 'radial' ? '📋 List View' : '⭕ Radial View'}
                   </button>
@@ -440,29 +356,28 @@ const BoonBuilderV2: React.FC = () => {
 
               <div className="flex-1 overflow-auto">
                 {viewMode === 'radial' ? (
-                  // RADIAL VIEW: Dual Radial Menus (Placeholder)
-                  <div className="grid grid-cols-2 gap-6 h-full">
-                    <div className="bg-gray-800/20 rounded-lg border border-purple-500/20 flex flex-col items-center justify-center p-8">
-                      <div className="text-lg font-semibold text-purple-300 mb-4">Core Boons</div>
-                      <div className="text-sm text-gray-400 text-center mb-6">slot → god → boon</div>
-                      <div className="w-48 h-48 rounded-full border-2 border-dashed border-purple-500/30 flex items-center justify-center">
-                        <div className="text-gray-500 text-center">
-                          <div className="text-3xl mb-2">⚔️</div>
-                          <div className="text-xs">Coming Soon</div>
-                        </div>
-                      </div>
-                    </div>
+                  // RADIAL VIEW: Enhanced Interactive Radial Menu
+                  <div className="relative h-full flex items-center justify-center">
+                    {/* Particle Field Background */}
+                    <ParticleField particleCount={50} />
 
-                    <div className="bg-gray-800/20 rounded-lg border border-blue-500/20 flex flex-col items-center justify-center p-8">
-                      <div className="text-lg font-semibold text-blue-300 mb-4">Non-Core Boons</div>
-                      <div className="text-sm text-gray-400 text-center mb-6">category → god → boon</div>
-                      <div className="w-48 h-48 rounded-full border-2 border-dashed border-blue-500/30 flex items-center justify-center">
-                        <div className="text-gray-500 text-center">
-                          <div className="text-3xl mb-2">✨</div>
-                          <div className="text-xs">Coming Soon</div>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Enhanced Radial Menu */}
+                    <EnhancedRadialMenu
+                      gods={mockGods}
+                      boons={mockCoreBoons}
+                      nonCoreBoons={mockNonCoreBoons}
+                      availableDuoBoons={availableDuoBoons}
+                      availableLegendaryBoons={availableLegendaryBoons}
+                      selectedCoreBoons={selectedBuild.coreBoons}
+                      selectedNonCoreBoons={selectedBuild.nonCoreBoons}
+                      selectedDuoBoons={selectedBuild.duoBoons}
+                      selectedLegendaryBoons={selectedBuild.legendaryBoons}
+                      onSelectCoreBoon={handleSelectCoreBoon}
+                      onSelectNonCoreBoon={handleSelectNonCoreBoon}
+                      onSelectDuoBoon={handleSelectDuoBoon}
+                      onSelectLegendaryBoon={handleSelectLegendaryBoon}
+                      setHoveredBoon={setHoveredBoon}
+                    />
                   </div>
                 ) : (
                   // LIST VIEW: Gods + Boons Grid
@@ -481,10 +396,10 @@ const BoonBuilderV2: React.FC = () => {
                             {gods.map(god => (
                               <button
                                 key={god.godId}
-                                className="flex flex-col items-center p-3 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600/30 transition-colors"
+                                className="flex flex-col items-center p-3 rounded-lg bg-gray-700/30 hover:bg-gray-600/40 border-2 border-purple-500/20 transition-colors"
                                 title={god.description}
                               >
-                                <ImageWithFallback src={god.iconUrl} alt={god.name} className="w-12 h-12 rounded object-cover mb-2" fallbackIcon="👤" />
+                                <ImageWithFallback key={god.iconUrl} src={god.iconUrl} alt={god.name} className="w-12 h-12 rounded object-cover mb-2" fallbackIcon="👤" />
                                 <div className="text-xs text-white truncate w-full text-center">{god.name}</div>
                               </button>
                             ))}
@@ -503,9 +418,9 @@ const BoonBuilderV2: React.FC = () => {
                             onClick={() => handleSelectNonCoreBoon(boon)}
                             onMouseEnter={() => setHoveredBoon(boon)}
                             onMouseLeave={() => setHoveredBoon(null)}
-                            className="flex flex-col items-center p-2 rounded bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600/30 transition-colors"
+                            className="flex flex-col items-center p-2 rounded bg-gray-700/30 hover:bg-gray-600/40 border-2 border-purple-500/20 transition-colors"
                           >
-                            <ImageWithFallback src={boon.iconUrl} alt={boon.name} className="w-10 h-10 rounded object-cover mb-1" fallbackIcon="✨" />
+                            <ImageWithFallback key={boon.iconUrl} src={boon.iconUrl} alt={boon.name} className="w-10 h-10 rounded object-cover mb-1" fallbackIcon="✨" />
                             <div className="text-[10px] text-white truncate w-full text-center">{boon.name}</div>
                           </button>
                         ))}
@@ -550,6 +465,23 @@ const BoonBuilderV2: React.FC = () => {
 
         </div>
       </div>
+
+      {/* Modals */}
+      <KeepsakeModal
+        isOpen={isKeepsakeModalOpen}
+        onClose={() => setIsKeepsakeModalOpen(false)}
+        selectedKeepsake={selectedBuild.keepsake}
+        onSelectKeepsake={handleSelectKeepsake}
+      />
+
+      <ArcanaCardModal
+        isOpen={isArcanaModalOpen}
+        onClose={() => setIsArcanaModalOpen(false)}
+        selectedCards={selectedBuild.arcanaCards}
+        onSelectCards={handleSelectArcanaCards}
+        maxGrasp={selectedBuild.maxGrasp}
+        onMaxGraspChange={handleMaxGraspChange}
+      />
     </div>
   );
 };

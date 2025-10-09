@@ -57,7 +57,7 @@ const BuildControlsPanel: React.FC<BuildControlsPanelProps> = ({
   onShare
 }) => {
   return (
-    <div className="bg-gray-800/40 rounded-lg p-4 border border-gray-700/50 h-full flex flex-col">
+    <div className="bg-gray-800/40 rounded-lg p-4 border-2 border-purple-500/30 h-full flex flex-col">
       <div className="flex items-center mb-4">
         <div className="flex-1"></div>
         <h3 className="text-lg font-semibold text-purple-300">Build Details</h3>
@@ -84,7 +84,7 @@ const BuildControlsPanel: React.FC<BuildControlsPanelProps> = ({
           placeholder="Enter build name..."
           value={buildName}
           onChange={(e) => onNameChange(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700/50 rounded border border-gray-600/50
+          className="w-full px-3 py-2 bg-gray-700/50 rounded border-2 border-purple-500/20
             focus:border-purple-500 focus:outline-none text-white text-sm
             placeholder-gray-500"
         />
@@ -107,7 +107,7 @@ const BuildControlsPanel: React.FC<BuildControlsPanelProps> = ({
           value={buildDescription}
           onChange={(e) => onDescriptionChange(e.target.value)}
           maxLength={300}
-          className="w-full px-3 py-2 bg-gray-700/50 rounded border border-gray-600/50
+          className="w-full px-3 py-2 bg-gray-700/50 rounded border-2 border-purple-500/20
             focus:border-purple-500 focus:outline-none text-white text-sm resize-none
             placeholder-gray-500"
         />
@@ -141,7 +141,7 @@ const BuildControlsPanel: React.FC<BuildControlsPanelProps> = ({
           <select
             value={difficulty}
             onChange={(e) => onDifficultyChange(Number(e.target.value) as BuildDifficulty)}
-            className="w-full px-2 py-1.5 bg-gray-700/50 rounded border border-gray-600/50
+            className="w-full px-2 py-1.5 bg-gray-700/50 rounded border-2 border-purple-500/20
               focus:border-purple-500 focus:outline-none text-white text-sm"
           >
             {Object.entries(difficultyLabels).map(([value, label]) => (
@@ -178,7 +178,7 @@ const BuildControlsPanel: React.FC<BuildControlsPanelProps> = ({
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-4 pt-4 border-t border-gray-700/50">
+      <div className="mt-4 pt-4 border-t border-purple-500/20">
         <div className="text-xs text-gray-500 space-y-1">
           <div className="flex justify-between">
             <span>Core Boons:</span>

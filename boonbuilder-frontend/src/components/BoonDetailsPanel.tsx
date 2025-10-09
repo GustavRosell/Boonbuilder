@@ -53,7 +53,7 @@ const getBoonTypeColor = (type: BoonType | string): string => {
 const BoonDetailsPanel: React.FC<BoonDetailsPanelProps> = ({ boon, isAvailable = true, isPinned = false, onClearPin }) => {
   if (!boon) {
     return (
-      <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-700/50 h-full flex flex-col items-center justify-center">
+      <div className="bg-gray-800/40 rounded-lg p-6 border-2 border-purple-500/30 h-full flex flex-col items-center justify-center">
         <div className="text-gray-600 text-center">
           <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30" />
           <p className="text-sm">Hover or click a boon to see details</p>
@@ -66,15 +66,16 @@ const BoonDetailsPanel: React.FC<BoonDetailsPanelProps> = ({ boon, isAvailable =
   const typeColor = getBoonTypeColor(boon.type);
 
   return (
-    <div className="bg-gray-800/40 rounded-lg border border-gray-700/50 h-full flex flex-col">
+    <div className="bg-gray-800/40 rounded-lg border-2 border-purple-500/30 h-full flex flex-col">
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-auto p-4">
 
         {/* Header: Icon + Name + Type */}
-        <div className="flex items-start gap-4 mb-4 pb-4 border-b border-gray-700/50">
-        <div className="w-16 h-16 rounded-lg bg-gray-700/50 border border-gray-600/50 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-start gap-4 mb-4 pb-4 border-b border-purple-500/20">
+        <div className="w-16 h-16 rounded-lg bg-gray-700/50 border-2 border-purple-500/20 flex items-center justify-center flex-shrink-0">
           <ImageWithFallback
+            key={boon.iconUrl}
             src={boon.iconUrl}
             alt={boon.name}
             className="w-14 h-14 object-cover rounded"
@@ -152,6 +153,7 @@ const BoonDetailsPanel: React.FC<BoonDetailsPanelProps> = ({ boon, isAvailable =
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 px-3 py-1 bg-purple-900/20 border border-purple-500/30 rounded-full">
               <ImageWithFallback
+                key={boon.firstGod.iconUrl}
                 src={boon.firstGod.iconUrl}
                 alt={boon.firstGod.name}
                 className="w-4 h-4 rounded-full"
@@ -162,6 +164,7 @@ const BoonDetailsPanel: React.FC<BoonDetailsPanelProps> = ({ boon, isAvailable =
             <span className="text-gray-600">+</span>
             <div className="flex items-center gap-2 px-3 py-1 bg-purple-900/20 border border-purple-500/30 rounded-full">
               <ImageWithFallback
+                key={boon.secondGod.iconUrl}
                 src={boon.secondGod.iconUrl}
                 alt={boon.secondGod.name}
                 className="w-4 h-4 rounded-full"
@@ -184,7 +187,7 @@ const BoonDetailsPanel: React.FC<BoonDetailsPanelProps> = ({ boon, isAvailable =
 
       {/* Clear Selection Button - Always at Bottom */}
       {isPinned && onClearPin && (
-        <div className="p-4 pt-3 border-t border-gray-700/50 flex justify-center">
+        <div className="p-4 pt-3 border-t border-purple-500/20 flex justify-center">
           <button
             onClick={onClearPin}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50

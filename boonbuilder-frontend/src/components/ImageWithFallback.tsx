@@ -1,61 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ImageWithFallbackProps {
-  src: string;
+  src?: string | null;
   alt: string;
   className?: string;
+  imageClassName?: string;
   fallbackIcon?: string;
 }
+
+/**
+ * ImageWithFallback Component
+ *
+ * Displays images with a fallback chain: .webp → .png → .svg → fallback icon
+ * Shows a loading spinner during image load
+ *
+ * Features:
+ * - Automatic fallback chain for missing images
+ * - Handles empty/null src values immediately (no spinner)
+ * - Proper state management with useEffect for src changes
+ * - Cached image detection (shows immediately if already loaded)
+ * - Case-insensitive extension handling with query string support
+ */
+
+const getFallbackSource = (source: string): string | null => {
+  // Split off query params to preserve them
+  const [path, query] = source.split('?', 2);
+  const suffix = query ? `?${query}` : '';
+  const lowerPath = path.toLowerCase();
+
+  // Try fallback extensions: .webp → .png → .svg
+  if (lowerPath.endsWith('.webp')) {
+    return `${path.slice(0, -5)}.png${suffix}`;
+  } else if (lowerPath.endsWith('.png')) {
+    return `${path.slice(0, -4)}.svg${suffix}`;
+  }
+  return null; // No more fallbacks
+};
 
 const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
   alt,
   className = '',
+  imageClassName = '',
   fallbackIcon = '?'
 }) => {
-  const [currentSrc, setCurrentSrc] = useState(src);
-  const [imageError, setImageError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Sanitize src input - handle null/undefined/empty strings
+  const sanitizedSrc = typeof src === 'string' ? src.trim() : '';
 
-  // Reset state when src prop changes
+  const [currentSrc, setCurrentSrc] = useState<string | null>(sanitizedSrc || null);
+  const [imageError, setImageError] = useState(!sanitizedSrc); // Immediate error if no src
+  const [isLoading, setIsLoading] = useState(!!sanitizedSrc); // Only load if we have a src
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  // Reset state when src prop changes (critical for hover image updates)
   useEffect(() => {
-    setCurrentSrc(src);
+    if (!sanitizedSrc) {
+      // No valid src - show fallback immediately
+      setCurrentSrc(null);
+      setImageError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    setCurrentSrc(sanitizedSrc);
     setImageError(false);
     setIsLoading(true);
-  }, [src]);
+  }, [sanitizedSrc]);
 
-  // Add timeout to prevent infinite loading (1 second for quick hover feedback)
+  // Check if image is already cached (complete and has dimensions)
   useEffect(() => {
-    if (!isLoading) return;
+    if (!currentSrc || !isLoading) return;
 
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
-        // If still loading after 1 second, show fallback
-        setImageError(true);
-        setIsLoading(false);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, [isLoading]);
+    const el = imgRef.current;
+    if (el && el.complete && el.naturalWidth > 0) {
+      // Image was already cached, show immediately
+      setIsLoading(false);
+    }
+  }, [currentSrc, isLoading]);
 
   const handleImageError = () => {
-    // Try fallback chain: .webp → .png → .svg
-    if (currentSrc.endsWith('.webp')) {
-      const pngFallback = currentSrc.replace('.webp', '.png');
-      setCurrentSrc(pngFallback);
+    if (!currentSrc) {
+      setImageError(true);
+      setIsLoading(false);
+      return;
+    }
+
+    const fallbackSrc = getFallbackSource(currentSrc);
+    if (fallbackSrc && fallbackSrc !== currentSrc) {
+      // Try next fallback in chain
+      setCurrentSrc(fallbackSrc);
       setIsLoading(true);
       return;
     }
 
-    if (currentSrc.endsWith('.png')) {
-      const svgFallback = currentSrc.replace('.png', '.svg');
-      setCurrentSrc(svgFallback);
-      setIsLoading(true);
-      return;
-    }
-
-    // If all attempts fail, show fallback icon
+    // No more fallbacks, show fallback icon
     setImageError(true);
     setIsLoading(false);
   };
@@ -64,29 +102,46 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     setIsLoading(false);
   };
 
-  if (imageError) {
-    // Fallback to icon/emoji when image fails to load
-    return (
-      <div className={`flex items-center justify-center bg-purple-600/30 text-white ${className}`}>
-        <span className="text-2xl opacity-50">{fallbackIcon}</span>
-      </div>
-    );
-  }
+  const showImage = !!currentSrc && !imageError;
+  const imageClasses = [
+    'w-full',
+    'h-full',
+    'object-cover',
+    'transition-opacity',
+    'duration-200',
+    imageClassName,
+    isLoading ? 'opacity-0' : 'opacity-100'
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={`relative ${className}`}>
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-purple-600/30 rounded">
-          <div className="w-1/3 h-1/3 max-w-[24px] max-h-[24px] border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+      {showImage ? (
+        <>
+          {/* Loading Spinner */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-purple-600/30 rounded">
+              <div className="w-1/3 h-1/3 max-w-[24px] max-h-[24px] border-2 border-purple-300 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+
+          {/* Image */}
+          <img
+            ref={imgRef}
+            src={currentSrc ?? undefined}
+            alt={alt}
+            className={imageClasses}
+            onError={handleImageError}
+            onLoad={handleImageLoad}
+          />
+        </>
+      ) : (
+        /* Fallback Icon */
+        <div className="absolute inset-0 flex items-center justify-center bg-purple-600/30 rounded text-white">
+          <span className="text-2xl opacity-50">{fallbackIcon}</span>
         </div>
       )}
-      <img
-        src={currentSrc}
-        alt={alt}
-        className={`w-full h-full ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
-        onError={handleImageError}
-        onLoad={handleImageLoad}
-      />
     </div>
   );
 };

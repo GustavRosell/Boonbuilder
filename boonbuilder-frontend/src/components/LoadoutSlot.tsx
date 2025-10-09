@@ -94,6 +94,7 @@ const LoadoutSlot: React.FC<LoadoutSlotProps> = ({
         shadow-lg transition-all duration-300 group-hover:scale-105
       `}>
         <ImageWithFallback
+          key={getItemIcon()}
           src={getItemIcon()}
           alt={getItemName()}
           className={`
