@@ -16,3 +16,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Hide Scrollbar Completely - Keep Scroll Functionality */
+
+/* Chrome, Edge, Safari - Hide scrollbar */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* Firefox - Hide scrollbar */
+* {
+  scrollbar-width: none;
+}
+
+/* IE and Edge (legacy) - Hide scrollbar */
+* {
+  -ms-overflow-style: none;
+}

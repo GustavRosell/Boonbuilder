@@ -1,0 +1,966 @@
+# BoonBuilder V2: Game-Authentic Redesign Plan
+
+**Status**: 🚧 In Development
+**Strategy**: UI-First with Parallel Development (Non-Destructive)
+**Created**: 2025-10-08
+
+---
+
+## 📋 Table of Contents
+1. [Overview](#overview)
+2. [Architecture Changes](#architecture-changes)
+3. [God Categorization System](#god-categorization-system)
+4. [Core vs Non-Core Boon System](#core-vs-non-core-boon-system)
+5. [UI Components](#ui-components)
+6. [Implementation Phases](#implementation-phases)
+7. [Data Structure Templates](#data-structure-templates)
+8. [Mock Data Structure](#mock-data-structure)
+9. [Backend Integration Guide](#backend-integration-guide)
+10. [Progress Checklist](#progress-checklist)
+11. [Technical Decisions](#technical-decisions)
+12. [Rollback Strategy](#rollback-strategy)
+
+---
+
+## Overview
+
+### Vision
+Transform BoonBuilder to match Hades II's actual in-game UI with proper god categorization, dual radial menus for core/non-core boon selection, and a game-authentic loadout panel that mirrors the screenshot provided.
+
+### Key Features
+- **Dual Radial Menu System**: Separate menus for core boons (slot-based) and non-core boons (god-based)
+- **God Categorization**: Core Gods, Non-Standard Gods, NPC Gods, Allies (22 gods total)
+- **Game-Authentic Loadout**: Matches Hades II UI with greyed-out empty slots and proper boon placement
+- **View Toggle**: Switch between Radial Menu and List/Grid View
+- **Non-Destructive Development**: New page alongside existing Creator (can coexist or replace)
+
+### Development Strategy
+**Phase 1**: UI-first with mock data (no backend changes)
+**Phase 2**: Backend model updates (while gathering real game data)
+**Phase 3**: Integration and data seeding
+**Phase 4**: Polish and production switch
+
+---
+
+## Architecture Changes
+
+### Current Architecture
+```
+Creator Page:
+- Single Radial Menu (main → slot → god → boon)
+- LoadoutPanel shows: Weapon + Familiar + Core Boons
+- Separate sections for Duo/Legendary boons
+- Available boons shown in grid on right side
+```
+
+### New Architecture (V2)
+```
+BoonBuilder V2 Page:
+- Dual Radial Menu System:
+  1. Core Boons Radial: main → slot → core gods → core boons
+  2. Non-Core Boons Radial: main → god category → god → non-core boons
+- Game-Authentic Loadout Panel:
+  - Left Column: Weapon + Familiar + Core Slots (greyed when empty)
+  - Right Column: Non-Core Boons Pool + Duo/Legendary sections
+- Toggle Switch: Radial ↔ List View
+```
+
+---
+
+## God Categorization System
+
+### GodType Enum (Backend)
+```csharp
+public enum GodType
+{
+    CoreGods = 1,        // Standard Olympians
+    NonStandardGods = 2, // Chaos, Hermes, Selene
+    NPCGods = 3,         // Artemis, Athena, Dionysus, Hades
+    Allies = 4           // Arachne, Narcissus, Echo, Medea, Circe, Icarus
+}
+```
+
+### God Distribution (22 Total)
+
+#### 1. Core Gods / Olympians (9)
+- **Aphrodite**: Weak, Charmed | Air + Water
+- **Apollo**: Daze, Double Attack chance | Air + Fire
+- **Ares**: Wounds, damage boost | Fire
+- **Demeter**: Freeze, Gust, health restoration | Earth + Water
+- **Hephaestus**: Glow, Blast, Armor | Earth + Fire
+- **Hera**: Hitch, rarity boost, family boons | Earth + Aether
+- **Hestia**: Scorch (DoT), projectile protection | Fire
+- **Poseidon**: Knockback, Froth, Splash | Water + Aether
+- **Zeus**: Blitz, Bolt, Chain-Lightning | Air + Aether
+
+#### 2. Non-Standard Gods (3)
+- **Chaos**: Variety of bonuses after debuff period
+- **Hermes**: Mobility, speed, evasion, wealth
+- **Selene**: Hex boons (activated via Magick)
+
+#### 3. NPC Gods (4)
+- **Artemis**: Critical Hits, Marked status (appears in Erebus, Oceanus, Ephyra)
+- **Athena**: Deflect effects, defense (Mount Olympus with Gorgon Amulet)
+- **Dionysus**: Hangover, Festive Fog, survivability (Mount Olympus)
+- **Hades**: Advantages against Chronos (Tartarus)
+
+#### 4. Allies (6)
+- **Arachne**: Armor and temporary boons (Erebus)
+- **Narcissus**: Supplies, rare resources, Death Defiance (Oceanus)
+- **Echo**: Duplicates rewards and resources (Fields of Mourning)
+- **Medea**: Curse-based boons, damage over time (Ephyra)
+- **Circe**: Witchcraft, transformation, Arcana activation (Rift of Thessaly)
+- **Icarus**: Armor, Power increase, supplies (Thessaly/Olympus)
+
+---
+
+## Core vs Non-Core Boon System
+
+### Slot Name Mapping (Game-Accurate)
+```typescript
+// Display names (UI)
+Attack → "Strike"
+Special → "Flourish"
+Cast → "Ring"
+Sprint → "Rush"
+Magick → "Gain"
+
+// Enum values remain unchanged (backend compatibility)
+BoonSlot.Attack = 1
+BoonSlot.Special = 2
+BoonSlot.Cast = 3
+BoonSlot.Sprint = 4
+BoonSlot.Magick = 6
+```
+
+### Core Boons (Slot-Based)
+- **Definition**: Boons that occupy one of the 5 core slots (Attack/Special/Cast/Sprint/Magick)
+- **Type**: `BoonType.Core = 1`
+- **Selection Flow**: Slot → God → Boon
+- **Visual**: Greyed-out slot template when empty, replaced by boon icon when selected
+- **Gods**: Only Core Gods (Olympians) can provide core boons
+
+### Non-Core Boons (Passive/Special)
+- **Definition**: Boons that don't occupy core slots (passive effects, enhancements, utilities)
+- **Types**:
+  - `BoonType.Chaos = 4` (Chaos boons)
+  - `BoonType.Hex = 6` (Selene Magick-activated)
+  - `BoonType.Godsent = 7` (NPC/Ally boons)
+  - `BoonType.Infusion = 5` (Elemental infusions)
+- **Selection Flow**: God Category → God → Boon
+- **Visual**: Displayed in separate pool/list area, not tied to slots
+- **Gods**: All god types can provide non-core boons
+
+### Duo & Legendary Boons
+- **Unchanged**: Still require prerequisites from core boons
+- **Display**: Shown in separate section below non-core pool
+- **Availability**: Dynamically calculated based on selected core boons
+
+---
+
+## UI Components
+
+### 1. BoonBuilderV2.tsx (Main Container)
+**Purpose**: Top-level component managing state and layout
+**State**:
+```typescript
+interface BuildStateV2 {
+  weapon?: Weapon;
+  aspect?: WeaponAspect;
+  familiar?: Familiar;
+  familiarAbility?: FamiliarAbility;
+  coreBoons: Map<BoonSlot, Boon>;      // Slot-based core boons
+  nonCoreBoons: Boon[];                 // Array of non-core boons
+  duoBoons: AvailableBoon[];
+  legendaryBoons: AvailableBoon[];
+  name: string;
+  description: string;
+}
+```
+
+**Layout**:
+```
+┌─────────────┬──────────────────────┬──────────────────────┐
+│   Sidebar   │   Loadout Panel      │   Dual Radial Menus  │
+│   (Reused)  │   (Game-Authentic)   │   (Core + Non-Core)  │
+└─────────────┴──────────────────────┴──────────────────────┘
+```
+
+### 2. LoadoutPanelV2.tsx (Game-Authentic Display)
+**Purpose**: Display current build matching Hades II screenshot
+
+**Layout**:
+```
+┌─────────────────────┬────────────────────────┐
+│   MAIN LOADOUT      │   NON-CORE POOL        │
+│                     │                        │
+│   [Weapon Icon]     │   ┌──────────────────┐ │
+│   Weapon Name       │   │ Non-Core Boons   │ │
+│                     │   │ [icon] [icon]    │ │
+│   [Familiar Icon]   │   │ [icon] [icon]    │ │
+│   Familiar Name     │   │ ...              │ │
+│                     │   └──────────────────┘ │
+│   ┌───────────────┐ │                        │
+│   │ CORE BOONS    │ │   ┌──────────────────┐ │
+│   │               │ │   │ DUO BOONS        │ │
+│   │ [Attack]      │ │   │ [icon] [icon]    │ │
+│   │ [Special]     │ │   └──────────────────┘ │
+│   │ [Cast]        │ │                        │
+│   │ [Sprint]      │ │   ┌──────────────────┐ │
+│   │ [Magick]      │ │   │ LEGENDARY BOONS  │ │
+│   │               │ │   │ [icon] [icon]    │ │
+│   └───────────────┘ │   └──────────────────┘ │
+└─────────────────────┴────────────────────────┘
+```
+
+**Key Features**:
+- Empty slots show greyed-out template images
+- Selected boons replace templates with actual icon
+- Non-core boons displayed separately from core slots
+- Matches provided Hades II screenshot exactly
+
+### 3. DualRadialMenu.tsx (New Component)
+**Purpose**: Side-by-side radial menus for different selection flows
+
+**Structure**:
+```typescript
+interface DualRadialMenuProps {
+  // Core Radial (Left)
+  coreMenuActive: boolean;
+  onSelectCoreBoon: (boon: Boon, slot: BoonSlot) => void;
+
+  // Non-Core Radial (Right)
+  nonCoreMenuActive: boolean;
+  onSelectNonCoreBoon: (boon: Boon) => void;
+
+  // Shared props
+  gods: GodWithType[];
+  boons: Boon[];
+  // ... other props
+}
+```
+
+**Visual Layout**:
+```
+┌────────────────────┬────────────────────┐
+│   CORE RADIAL      │   NON-CORE RADIAL  │
+│                    │                    │
+│   [Radial Menu]    │   [Radial Menu]    │
+│   for slot-based   │   for god-based    │
+│   selection        │   selection        │
+└────────────────────┴────────────────────┘
+```
+
+### 4. CoreBoonRadial.tsx (Left Radial)
+**Purpose**: Select core boons via slot → god → boon flow
+
+**Menu States**:
+```typescript
+type CoreMenuState = 'main' | 'slot_selection' | 'god_selection' | 'boon_selection';
+```
+
+**Flow**:
+1. **Main**: Show 5 core slots (Attack, Special, Cast, Sprint, Magick)
+2. **Slot Selected**: Show Core Gods (9 Olympians)
+3. **God Selected**: Show core boons for selected god + slot
+4. **Boon Selected**: Add to build, return to main
+
+### 5. NonCoreBoonRadial.tsx (Right Radial)
+**Purpose**: Select non-core boons via category → god → boon flow
+
+**Menu States**:
+```typescript
+type NonCoreMenuState = 'main' | 'category_selection' | 'god_selection' | 'boon_selection';
+```
+
+**Flow**:
+1. **Main**: Show 4 god categories (Core, NonStandard, NPC, Allies)
+2. **Category Selected**: Show gods in that category
+3. **God Selected**: Show non-core boons for selected god
+4. **Boon Selected**: Add to non-core pool, return to main
+
+### 6. ViewToggle.tsx (New Component)
+**Purpose**: Toggle between Radial and List views
+
+**States**:
+```typescript
+type ViewMode = 'radial' | 'list';
+```
+
+**Behavior**:
+- **Radial Mode**: Show dual radial menus
+- **List Mode**: Show grid/list of all boons (similar to current Available Boons grid)
+- Toggle button placed above the radial/list area
+
+---
+
+## Implementation Phases
+
+### ✅ Phase 1: Documentation & Mock Data (In Progress)
+**Goal**: Create planning documents and placeholder data for UI development
+**Tasks**:
+- [x] Create `docs/REDESIGN_PLAN.md` (this file)
+- [ ] Create `mockBoonData.ts` with 22 gods and sample boons
+- [ ] Create `mockBoonDataTemplates.ts` for user to fill real game data
+- [ ] Document slot name mappings and GodType enum
+
+**No Backend Changes Required**
+
+---
+
+### 🔲 Phase 2: UI Implementation with Mock Data
+**Goal**: Build complete UI with placeholder data (no backend dependency)
+**Tasks**:
+- [ ] Create `BoonBuilderV2.tsx` main container
+- [ ] Create `LoadoutPanelV2.tsx` matching game screenshot
+- [ ] Create `DualRadialMenu.tsx` wrapper component
+- [ ] Create `CoreBoonRadial.tsx` for slot-based selection
+- [ ] Create `NonCoreBoonRadial.tsx` for god-based selection
+- [ ] Create `ViewToggle.tsx` for view switching
+- [ ] Add new route to sidebar navigation (`/boon-builder-v2`)
+- [ ] Test all UI flows with mock data
+
+**Deliverable**: Fully functional UI prototype using placeholder data
+
+---
+
+### 🔲 Phase 3: Backend Model Updates
+**Goal**: Update database schema to support god categorization
+**Tasks**:
+- [ ] Add `GodType` enum to `Models/Enums.cs`
+- [ ] Update `God.cs` model with `GodType` property
+- [ ] Create EF migration: `dotnet ef migrations add AddGodTypeToGods`
+- [ ] Apply migration: `dotnet ef database update`
+- [ ] Update `BoonSeeder.cs` to assign `CoreGods` to existing 9 gods
+- [ ] Update `GodsController.cs` to return `GodType` in API responses
+- [ ] Update frontend `types/index.ts` to include `GodType` enum
+
+**Deliverable**: Database schema supports god categorization
+
+---
+
+### 🔲 Phase 4: Data Gathering (User-Led)
+**Goal**: Collect complete Hades II game data for 13 new gods
+**Tasks**:
+- [ ] Gather data for 3 Non-Standard Gods (Chaos, Hermes, Selene)
+- [ ] Gather data for 4 NPC Gods (Artemis, Athena, Dionysus, Hades)
+- [ ] Gather data for 6 Allies (Arachne, Narcissus, Echo, Medea, Circe, Icarus)
+- [ ] List all non-core boons for each god (with full properties)
+- [ ] Collect icon URLs for all new gods and boons
+- [ ] Verify status effects and elemental alignments
+
+**Reference**: See "Data Structure Templates" section below for required format
+
+---
+
+### 🔲 Phase 5: Backend Data Seeding
+**Goal**: Seed database with real game data
+**Tasks**:
+- [ ] Update `BoonSeeder.cs` with 13 new gods (using gathered data)
+- [ ] Add non-core boon seeding methods
+- [ ] Seed Chaos boons (`BoonType.Chaos`)
+- [ ] Seed Hex boons (`BoonType.Hex`)
+- [ ] Seed Godsent boons (`BoonType.Godsent`)
+- [ ] Seed Infusion boons for all gods
+- [ ] Delete database and restart API to apply seeding
+- [ ] Verify data via API endpoints
+
+**Deliverable**: Database contains all 22 gods and complete boon data
+
+---
+
+### 🔲 Phase 6: Backend Integration
+**Goal**: Connect UI to real API instead of mock data
+**Tasks**:
+- [ ] Update `services/api.ts` to handle god categories
+- [ ] Replace mock data imports with API calls in `BoonBuilderV2.tsx`
+- [ ] Filter gods by `GodType` for radial menu categories
+- [ ] Update boon filtering to distinguish core vs non-core
+- [ ] Test prerequisite system with new boon types
+- [ ] Verify duo/legendary availability calculations
+
+**Deliverable**: Fully functional app with real game data
+
+---
+
+### 🔲 Phase 7: Polish & Testing
+**Goal**: Refine UX and prepare for production
+**Tasks**:
+- [ ] Add loading states for API calls
+- [ ] Implement error handling and fallbacks
+- [ ] Polish animations and transitions
+- [ ] Add tooltips and help text
+- [ ] Test all god categories and boon selections
+- [ ] Verify slot name mappings display correctly
+- [ ] Mobile responsiveness check
+- [ ] Cross-browser testing
+
+**Deliverable**: Production-ready BoonBuilder V2
+
+---
+
+### 🔲 Phase 8: Production Switch
+**Goal**: Deploy V2 as primary experience
+**Options**:
+1. **Replace Creator**: Update route `/creator` to use `BoonBuilderV2`
+2. **Coexist**: Keep both pages (rename old to "Classic Creator")
+3. **Toggle**: Add setting to switch between V1/V2
+
+**Tasks**:
+- [ ] Choose deployment strategy
+- [ ] Update navigation accordingly
+- [ ] Archive or remove old Creator page
+- [ ] Update documentation (CLAUDE.md, API.md, etc.)
+
+---
+
+## Data Structure Templates
+
+### Template 1: New God Entry (For BoonSeeder.cs)
+```csharp
+new God
+{
+    GodId = [NEXT_ID],
+    Name = "[God Name]",
+    IconUrl = "/images/gods/[god_name]/[god_name]_logo.png",
+    InfusionIconUrl = "/images/gods/[god_name]/infusion/[infusion_name].webp",
+    PrimaryElement = ElementType.[Element],
+    SecondaryElement = ElementType.[Element] | null,
+    StatusEffect = "[Status Effect Name]",
+    Description = "[Brief description]",
+    GodType = GodType.[CoreGods|NonStandardGods|NPCGods|Allies]
+}
+```
+
+**Example - Chaos**:
+```csharp
+new God
+{
+    GodId = 10,
+    Name = "Chaos",
+    IconUrl = "/images/gods/chaos/chaos_logo.png",
+    InfusionIconUrl = null, // Chaos might not have infusions
+    PrimaryElement = null, // Chaos is elementless
+    SecondaryElement = null,
+    StatusEffect = "None",
+    Description = "Primordial entity offering power through trials",
+    GodType = GodType.NonStandardGods
+}
+```
+
+### Template 2: Non-Core Boon Entry
+```csharp
+new Boon
+{
+    BoonId = [NEXT_ID],
+    Name = "[Boon Name]",
+    Type = BoonType.[Chaos|Hex|Godsent|Infusion],
+    GodId = [God ID],
+    Slot = null, // Non-core boons don't occupy slots
+    Description = "[Full description]",
+    Effect = "[Mechanical effect]",
+    IconUrl = "/images/boons/[god_name]/[boon_type]/[boon_name].webp",
+    Element = ElementType.[Element] | null,
+    StatusEffect = "[Status if applicable]",
+    IsPassive = true | false
+}
+```
+
+**Example - Hermes Speed Boon**:
+```csharp
+new Boon
+{
+    BoonId = 501,
+    Name = "Greatest Reflex",
+    Type = BoonType.Godsent,
+    GodId = 11, // Hermes
+    Slot = null,
+    Description = "You move significantly faster",
+    Effect = "+20% Movement Speed",
+    IconUrl = "/images/boons/hermes/godsent/greatest_reflex.webp",
+    Element = null,
+    StatusEffect = "",
+    IsPassive = true
+}
+```
+
+### Template 3: Mock Data God (TypeScript)
+```typescript
+const mockGod: GodWithType = {
+  godId: 10,
+  name: "Chaos",
+  iconUrl: "/images/gods/chaos/chaos_logo.png",
+  primaryElement: null,
+  secondaryElement: null,
+  statusEffect: "None",
+  description: "Primordial entity offering power through trials",
+  godType: GodType.NonStandardGods
+};
+```
+
+---
+
+## Mock Data Structure
+
+### File: `boonbuilder-frontend/src/data/mockBoonData.ts`
+
+**Purpose**: Provide placeholder data for UI development without backend dependency
+
+**Structure**:
+```typescript
+// Extended enum for mock data
+export enum GodType {
+  CoreGods = 1,
+  NonStandardGods = 2,
+  NPCGods = 3,
+  Allies = 4
+}
+
+export interface GodWithType extends God {
+  godType: GodType;
+}
+
+// Mock gods (22 total)
+export const mockGods: GodWithType[] = [
+  // Core Gods (9) - Use existing + add godType
+  { ...existingAphrodite, godType: GodType.CoreGods },
+  // ... (8 more Olympians)
+
+  // Non-Standard Gods (3)
+  {
+    godId: 10,
+    name: "Chaos",
+    iconUrl: "/images/slots/familiar.png", // Placeholder
+    primaryElement: null,
+    secondaryElement: null,
+    statusEffect: "None",
+    description: "Primordial entity offering power through trials",
+    godType: GodType.NonStandardGods
+  },
+  // ... Hermes, Selene
+
+  // NPC Gods (4)
+  // ... Artemis, Athena, Dionysus, Hades
+
+  // Allies (6)
+  // ... Arachne, Narcissus, Echo, Medea, Circe, Icarus
+];
+
+// Mock non-core boons
+export const mockNonCoreBoons: Boon[] = [
+  {
+    boonId: 500,
+    name: "Chaos Boon Placeholder",
+    type: BoonType.Chaos,
+    godId: 10,
+    slot: null,
+    description: "A mysterious boon from Chaos",
+    effect: "Grants power after trials",
+    iconUrl: "/images/slots/attack.png", // Placeholder
+    element: null,
+    statusEffect: "",
+    isPassive: true
+  },
+  // ... more placeholder boons
+];
+
+// Helper to filter by god type
+export const getGodsByType = (godType: GodType): GodWithType[] => {
+  return mockGods.filter(g => g.godType === godType);
+};
+```
+
+---
+
+## Backend Integration Guide
+
+### Step 1: Update Enums (Backend)
+**File**: `BoonBuilder.API/Models/Enums.cs`
+
+```csharp
+public enum GodType
+{
+    CoreGods = 1,
+    NonStandardGods = 2,
+    NPCGods = 3,
+    Allies = 4
+}
+
+// Update BoonType if needed
+public enum BoonType
+{
+    Core = 1,
+    Duo = 2,
+    Legendary = 3,
+    Chaos = 4,
+    Infusion = 5,
+    Hex = 6,
+    Godsent = 7
+}
+```
+
+### Step 2: Update God Model (Backend)
+**File**: `BoonBuilder.API/Models/God.cs`
+
+```csharp
+public class God
+{
+    public int GodId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string IconUrl { get; set; } = string.Empty;
+    public string? InfusionIconUrl { get; set; }
+    public ElementType? PrimaryElement { get; set; }
+    public ElementType? SecondaryElement { get; set; }
+    public string StatusEffect { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public GodType GodType { get; set; } // NEW PROPERTY
+
+    // Navigation properties (unchanged)
+    public ICollection<Boon> Boons { get; set; } = new List<Boon>();
+    public ICollection<DuoBoon> PrimaryDuoBoons { get; set; } = new List<DuoBoon>();
+    public ICollection<DuoBoon> SecondaryDuoBoons { get; set; } = new List<DuoBoon>();
+}
+```
+
+### Step 3: Create Migration
+```bash
+cd BoonBuilder.API
+dotnet ef migrations add AddGodTypeToGods
+dotnet ef database update
+```
+
+### Step 4: Update BoonSeeder (Backend)
+**File**: `BoonBuilder.API/Data/BoonSeeder.cs`
+
+```csharp
+private static List<God> GetGods()
+{
+    return new List<God>
+    {
+        // Update existing 9 gods with GodType
+        new God {
+            GodId = 1,
+            Name = "Aphrodite",
+            // ... existing properties ...
+            GodType = GodType.CoreGods
+        },
+        // ... (8 more Olympians with CoreGods)
+
+        // Add 13 new gods
+        new God {
+            GodId = 10,
+            Name = "Chaos",
+            IconUrl = "/images/gods/chaos/chaos_logo.png",
+            PrimaryElement = null,
+            SecondaryElement = null,
+            StatusEffect = "None",
+            Description = "Primordial entity offering power through trials",
+            GodType = GodType.NonStandardGods
+        },
+        // ... (12 more new gods)
+    };
+}
+
+// Add new seeding method
+private static List<Boon> GetAllNonCoreBoons()
+{
+    return new List<Boon>
+    {
+        // Chaos boons
+        new Boon {
+            BoonId = 500,
+            Name = "Strike Flourish",
+            Type = BoonType.Chaos,
+            GodId = 10,
+            Slot = null,
+            Description = "Your Strike and Flourish deal more damage but you take damage from traps",
+            Effect = "+40% Attack/Special Damage, +30% Trap Damage Taken",
+            IconUrl = "/images/boons/chaos/strike_flourish.webp",
+            IsPassive = false
+        },
+        // ... more non-core boons
+    };
+}
+```
+
+### Step 5: Update Frontend Types
+**File**: `boonbuilder-frontend/src/types/index.ts`
+
+```typescript
+export enum GodType {
+  CoreGods = 1,
+  NonStandardGods = 2,
+  NPCGods = 3,
+  Allies = 4
+}
+
+export interface God {
+  godId: number;
+  name: string;
+  iconUrl: string;
+  infusionIconUrl?: string;
+  primaryElement: ElementType | null;
+  secondaryElement?: ElementType | null;
+  statusEffect: string;
+  description: string;
+  godType: GodType; // NEW PROPERTY
+}
+```
+
+### Step 6: Update BuildState Interface
+**File**: `boonbuilder-frontend/src/types/index.ts`
+
+```typescript
+export interface BuildState {
+  weapon?: Weapon;
+  aspect?: WeaponAspect;
+  familiar?: Familiar;
+  familiarAbility?: FamiliarAbility;
+  coreBoons: Map<BoonSlot, Boon>;    // RENAMED from 'boons'
+  nonCoreBoons: Boon[];              // NEW: Array of non-core boons
+  duoBoons: AvailableBoon[];
+  legendaryBoons: AvailableBoon[];
+  name: string;
+  description: string;
+}
+```
+
+---
+
+## Progress Checklist
+
+### Phase 1: Documentation ✅ (In Progress)
+- [x] Create REDESIGN_PLAN.md
+- [ ] Create mockBoonData.ts
+- [ ] Create data collection templates for user
+
+### Phase 2: UI with Mock Data 🔲
+- [ ] Create BoonBuilderV2.tsx container
+- [ ] Create LoadoutPanelV2.tsx
+- [ ] Create DualRadialMenu.tsx
+- [ ] Create CoreBoonRadial.tsx
+- [ ] Create NonCoreBoonRadial.tsx
+- [ ] Create ViewToggle.tsx
+- [ ] Add route to sidebar
+- [ ] Test all UI flows
+
+### Phase 3: Backend Models 🔲
+- [ ] Add GodType enum to backend
+- [ ] Update God model
+- [ ] Create and apply migration
+- [ ] Update BoonSeeder for existing gods
+- [ ] Update API responses
+
+### Phase 4: Data Gathering 🔲 (User-Led)
+- [ ] Chaos god + boons
+- [ ] Hermes god + boons
+- [ ] Selene god + boons
+- [ ] Artemis god + boons
+- [ ] Athena god + boons
+- [ ] Dionysus god + boons
+- [ ] Hades god + boons
+- [ ] Arachne ally + boons
+- [ ] Narcissus ally + boons
+- [ ] Echo ally + boons
+- [ ] Medea ally + boons
+- [ ] Circe ally + boons
+- [ ] Icarus ally + boons
+
+### Phase 5: Backend Seeding 🔲
+- [ ] Seed 13 new gods
+- [ ] Seed non-core boons
+- [ ] Verify API responses
+
+### Phase 6: Integration 🔲
+- [ ] Replace mock data with API calls
+- [ ] Test god categorization
+- [ ] Test core vs non-core flows
+- [ ] Verify duo/legendary prerequisites
+
+### Phase 7: Polish 🔲
+- [ ] Loading states
+- [ ] Error handling
+- [ ] Animations
+- [ ] Testing
+
+### Phase 8: Production 🔲
+- [ ] Choose deployment strategy
+- [ ] Update routes
+- [ ] Update documentation
+
+---
+
+## Technical Decisions
+
+### Decision 1: Parallel Development Strategy
+**Rationale**: Create new `/boon-builder-v2` route instead of modifying existing Creator
+**Benefits**:
+- Zero risk to existing functionality
+- Easy A/B comparison during development
+- Can develop UI without backend changes
+- Simple rollback if needed
+
+**Implementation**: Add new sidebar item, keep both pages functional
+
+---
+
+### Decision 2: UI-First with Mock Data
+**Rationale**: Build complete visual prototype before backend changes
+**Benefits**:
+- Allows user to gather data in parallel
+- Frontend and backend teams can work independently
+- Early visual feedback for stakeholders
+- Faster iteration on UX
+
+**Implementation**: Create `mockBoonData.ts` with placeholder data
+
+---
+
+### Decision 3: Dual Radial Menu System
+**Rationale**: Separate radial menus for different selection flows
+**Benefits**:
+- Matches game's conceptual separation of core vs non-core
+- Clearer UX (slot-based vs god-based)
+- Reduces menu depth complexity
+- Better visual organization
+
+**Alternative Considered**: Single radial with mode toggle → Rejected (too complex)
+
+---
+
+### Decision 4: Slot Name Display Mapping
+**Rationale**: Use game-accurate names in UI while keeping enum values
+**Benefits**:
+- Authentic Hades II experience
+- No breaking changes to backend
+- Simple display-layer mapping
+
+**Implementation**:
+```typescript
+const slotDisplayNames: Record<BoonSlot, string> = {
+  [BoonSlot.Attack]: "Strike",
+  [BoonSlot.Special]: "Flourish",
+  [BoonSlot.Cast]: "Ring",
+  [BoonSlot.Sprint]: "Rush",
+  [BoonSlot.Magick]: "Gain"
+};
+```
+
+---
+
+### Decision 5: God Categorization via Enum
+**Rationale**: Use `GodType` enum instead of boolean flags
+**Benefits**:
+- Scalable (easy to add new categories)
+- Type-safe filtering
+- Clear semantic meaning
+- Matches game's conceptual groupings
+
+**Alternative Considered**: Boolean flags (`isCoreGod`, `isNPC`) → Rejected (not scalable)
+
+---
+
+### Decision 6: Separate Core vs Non-Core in BuildState
+**Rationale**: Split `boons` into `coreBoons` (Map) and `nonCoreBoons` (Array)
+**Benefits**:
+- Clear semantic distinction
+- Core boons remain slot-indexed (Map)
+- Non-core boons are order-independent (Array)
+- Easier filtering and display logic
+
+**Migration Path**:
+```typescript
+// Old
+boons: Map<BoonSlot, Boon>
+
+// New
+coreBoons: Map<BoonSlot, Boon>  // Slot-based core boons
+nonCoreBoons: Boon[]             // Array of passive/special boons
+```
+
+---
+
+## Rollback Strategy
+
+### If V2 Needs to be Reverted
+
+#### Option 1: Keep Both Pages (Recommended)
+1. Leave old Creator page at `/creator`
+2. Keep new page at `/boon-builder-v2`
+3. Let users choose preferred version
+4. Gather feedback before deprecating old version
+
+**Effort**: Minimal (just maintain two routes)
+
+#### Option 2: Remove V2 Route
+1. Remove `/boon-builder-v2` route from sidebar
+2. Delete `BoonBuilderV2.tsx` and related components
+3. Revert to old Creator as primary
+4. Database changes persist but aren't used (no harm)
+
+**Effort**: Low (remove route, keep old page)
+
+#### Option 3: Full Rollback (Backend Included)
+1. Revert migration: `dotnet ef migrations remove`
+2. Drop `GodType` column from database
+3. Remove V2 UI components
+4. Revert `God` model changes
+
+**Effort**: Medium (requires database rollback)
+
+### Recommended Approach
+- Start with **Option 1** (coexistence)
+- Gather user feedback for 2-4 weeks
+- Decide to deprecate old version or iterate on V2
+- Only use **Option 3** if fundamental architecture issues arise
+
+---
+
+## Next Steps
+
+### Immediate Actions (Now)
+1. ✅ Complete this document
+2. 🔲 Create `mockBoonData.ts` with placeholder gods/boons
+3. 🔲 Create `BoonBuilderV2.tsx` with dual radial layout
+4. 🔲 Wire up new route in sidebar
+
+### Short-Term (Next 1-2 Days)
+1. 🔲 Build out radial menu components with mock data
+2. 🔲 Create game-authentic loadout panel
+3. 🔲 Test all UI flows visually
+4. 🔲 Share prototype with user for feedback
+
+### Medium-Term (Next Week)
+1. 🔲 User gathers complete game data for 13 gods
+2. 🔲 Implement backend model changes
+3. 🔲 Seed database with real data
+4. 🔲 Connect UI to real API
+
+### Long-Term (Next 2-3 Weeks)
+1. 🔲 Polish and testing
+2. 🔲 Production deployment
+3. 🔲 Documentation updates
+4. 🔲 User feedback and iteration
+
+---
+
+## Questions & Notes
+
+### Open Questions
+1. **View Toggle**: Should List view replace radial or show alongside?
+2. **Naming**: "BoonBuilder V2" or different name for new page?
+3. **Migration**: Deprecate old Creator or keep both long-term?
+4. **Non-Core Display**: Grid, list, or carousel for non-core boons?
+
+### Notes for User
+- **Data Format**: Use templates in "Data Structure Templates" section
+- **Images**: Verify all icon paths match your asset structure
+- **Priority**: Focus on Core/NonStandard gods first (12 gods, 150+ boons)
+- **Testing**: Provide sample data for 1-2 gods per category for early testing
+
+---
+
+**Document Version**: 1.0
+**Last Updated**: 2025-10-08
+**Author**: Claude Code
+**Status**: Living Document (update as implementation progresses)

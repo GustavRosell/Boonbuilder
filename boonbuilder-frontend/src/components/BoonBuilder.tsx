@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, BookOpen, Hammer, Users, Heart, LogIn, Sparkles } from 'lucide-react';
 import RadialMenu from './RadialMenu';
 import LoadoutPanel from './LoadoutPanel';
 import DebugPanel from './DebugPanel';
+import BoonBuilderV2 from './BoonBuilderV2';
 import { God, Boon, BoonSlot, BuildState, Weapon, WeaponAspect, Familiar, FamiliarAbility, AvailableBoon } from '../types';
 import { godsApi, boonsApi, weaponsApi, familiarsApi } from '../services/api';
 import { extractSelectedBoonIds, filterAvailableBoons } from '../utils/boonPrerequisites';
 
-type PageType = 'home' | 'browse' | 'creator' | 'community' | 'favorites' | 'debug';
+type PageType = 'home' | 'browse' | 'creator' | 'builderV2' | 'community' | 'favorites' | 'debug';
 
 const BoonBuilder: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageType>('home');
@@ -204,6 +205,7 @@ const BoonBuilder: React.FC = () => {
             { id: 'home' as PageType, label: 'Home', icon: Home },
             { id: 'browse' as PageType, label: 'Browse', icon: BookOpen },
             { id: 'creator' as PageType, label: 'Creator', icon: Hammer },
+            { id: 'builderV2' as PageType, label: 'BoonBuilder V2', icon: Sparkles },
             { id: 'community' as PageType, label: 'Community', icon: Users },
             { id: 'favorites' as PageType, label: 'Favorites', icon: Heart },
             { id: 'debug' as PageType, label: 'Debug', icon: ChevronRight }
@@ -240,6 +242,7 @@ const BoonBuilder: React.FC = () => {
         <header className="bg-gray-800/50 backdrop-blur-sm border-b border-purple-500/30 px-6 py-4">
           <h2 className="text-xl font-semibold">
             {currentPage === 'creator' ? 'Build Creator' :
+             currentPage === 'builderV2' ? 'BoonBuilder V2 (Development)' :
              currentPage === 'browse' ? 'Browse Builds' :
              currentPage === 'community' ? 'Community Builds' :
              currentPage === 'favorites' ? 'Favorite Builds' :
@@ -247,7 +250,7 @@ const BoonBuilder: React.FC = () => {
           </h2>
         </header>
 
-        <main className="p-6">
+        <main className={currentPage === 'builderV2' ? 'h-[calc(100vh-5rem)] overflow-hidden' : 'p-6'}>
           {currentPage === 'creator' ? (
             <div className="flex gap-6 h-[calc(100vh-8rem)]">
               {/* Center - Loadout Panel */}
@@ -294,6 +297,8 @@ const BoonBuilder: React.FC = () => {
                 />
               </div>
             </div>
+          ) : currentPage === 'builderV2' ? (
+            <BoonBuilderV2 />
           ) : currentPage === 'debug' ? (
             <DebugPanel />
           ) : currentPage === 'home' ? (

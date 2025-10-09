@@ -13,7 +13,8 @@ export enum BoonType {
   Legendary = 2,
   Infusion = 3,
   Hex = 4,
-  Chaos = 5
+  Chaos = 5,
+  Godsent = 6
 }
 
 export enum BoonSlot {
@@ -53,7 +54,7 @@ export interface God {
   godId: number;
   name: string;
   iconUrl: string;
-  primaryElement: ElementType;
+  primaryElement?: ElementType;
   secondaryElement?: ElementType;
   statusEffect: string;
   description: string;
