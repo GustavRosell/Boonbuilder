@@ -71,7 +71,7 @@ const RadialCenterDisplay: React.FC<RadialCenterDisplayProps> = ({
             transition={{ duration: 0.05 }}
             onClick={onBack}
             className="
-              w-40 h-40 rounded-full
+              w-48 h-48 rounded-full
               bg-gradient-to-br from-gray-800 to-gray-900
               border-4 border-purple-400
               flex items-center justify-center
@@ -82,7 +82,7 @@ const RadialCenterDisplay: React.FC<RadialCenterDisplayProps> = ({
             "
             title="Go Back"
           >
-            <ChevronLeft className="w-20 h-20 text-purple-300" />
+            <ChevronLeft className="w-24 h-24 text-purple-300" />
           </motion.button>
         ) : hoveredItem ? (
           // HOVERED ITEM DISPLAY
@@ -93,7 +93,7 @@ const RadialCenterDisplay: React.FC<RadialCenterDisplayProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.05 }}
             className="
-              w-40 h-40 rounded-full
+              w-48 h-48 rounded-full
               bg-gray-900/90 backdrop-blur-md
               border-4 border-purple-400
               flex flex-col items-center justify-center
@@ -108,10 +108,10 @@ const RadialCenterDisplay: React.FC<RadialCenterDisplayProps> = ({
               key={hoveredItem.primaryIcon}
               src={hoveredItem.primaryIcon}
               alt={hoveredItem.primaryLabel}
-              className="w-20 h-20 rounded-lg mb-2"
+              className="w-24 h-24 rounded-lg mb-2"
               fallbackIcon="✨"
             />
-            <div className="text-sm font-semibold text-white text-center truncate w-full px-2">
+            <div className="text-base font-semibold text-white text-center truncate w-full px-2">
               {hoveredItem.primaryLabel}
             </div>
           </motion.div>
@@ -124,15 +124,15 @@ const RadialCenterDisplay: React.FC<RadialCenterDisplayProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.05 }}
             className="
-              w-40 h-40 rounded-full
+              w-48 h-48 rounded-full
               bg-gray-900/60 backdrop-blur-sm
               border-2 border-purple-500/40
               flex items-center justify-center
-              p-5
+              p-6
               shadow-lg
             "
           >
-            <div className="text-sm text-purple-300 text-center font-medium leading-tight">
+            <div className="text-base text-purple-300 text-center font-medium leading-tight">
               {getStateText()}
             </div>
           </motion.div>

@@ -100,7 +100,7 @@ const RadialItemCard: React.FC<RadialItemCardProps> = ({
         <div
           className={`
             relative flex flex-col items-center justify-center
-            w-40 h-48 rounded-xl border-3
+            w-44 h-52 rounded-xl border-3
             bg-gray-800/60 backdrop-blur-md
             ${getBorderColor()} ${getShadowClass()}
             transition-all duration-75
@@ -162,7 +162,7 @@ const RadialItemCard: React.FC<RadialItemCardProps> = ({
         <div
           className={`
             relative flex flex-col items-center justify-center
-            w-28 h-28 rounded-xl border-3
+            w-32 h-32 rounded-xl border-3
             bg-gray-800/60 backdrop-blur-md
             ${getBorderColor()} ${getShadowClass()}
             transition-all duration-75
@@ -177,7 +177,7 @@ const RadialItemCard: React.FC<RadialItemCardProps> = ({
             key={item.primaryIcon}
             src={item.primaryIcon}
             alt={item.primaryLabel}
-            className="w-16 h-16 rounded-lg mb-1"
+            className="w-20 h-20 rounded-lg mb-1"
             fallbackIcon={item.type === 'slot' ? '⚔️' : item.type === 'category' ? '📁' : '✨'}
           />
 

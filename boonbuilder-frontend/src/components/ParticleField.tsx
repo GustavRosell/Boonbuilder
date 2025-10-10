@@ -76,10 +76,10 @@ const ParticleField: React.FC<ParticleFieldProps> = ({
       particlesRef.current.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 2.5 + 0.5,
+        size: Math.random() * 3.5 + 1,
         speedX: (Math.random() - 0.5) * 0.3,
         speedY: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.4 + 0.2,
+        opacity: Math.random() * 0.5 + 0.3,
         color: colors[Math.floor(Math.random() * colors.length)]
       });
     }

@@ -261,7 +261,12 @@ const BoonBuilderV2: React.FC = () => {
   };
 
   const handlePinBoon = (boon: Boon | AvailableBoon) => {
-    setPinnedBoon(boon);
+    // Toggle: if clicking the same boon, unpin it
+    if (pinnedBoon && pinnedBoon.boonId === boon.boonId) {
+      setPinnedBoon(null);
+    } else {
+      setPinnedBoon(boon);
+    }
   };
 
   const handleClearPin = () => {
@@ -359,7 +364,7 @@ const BoonBuilderV2: React.FC = () => {
                   // RADIAL VIEW: Enhanced Interactive Radial Menu
                   <div className="relative h-full flex items-center justify-center">
                     {/* Particle Field Background */}
-                    <ParticleField particleCount={50} />
+                    <ParticleField particleCount={70} />
 
                     {/* Enhanced Radial Menu */}
                     <EnhancedRadialMenu

@@ -14,7 +14,7 @@
 export const calculatePolarPosition = (
   index: number,
   total: number,
-  radius: number = 380
+  radius: number = 420
 ): { x: number; y: number } => {
   // Start at top (-90°) and distribute evenly around circle
   const angleInDegrees = (index * (360 / total)) - 90;
@@ -84,10 +84,10 @@ export const getGodGlow = (godName: string): string => {
  * @returns Optimal radius in pixels
  */
 export const calculateOptimalRadius = (itemCount: number): number => {
-  if (itemCount <= 5) return 340;
-  if (itemCount <= 8) return 380;
-  if (itemCount <= 12) return 420;
-  return 460; // For 12+ items
+  if (itemCount <= 5) return 380;
+  if (itemCount <= 8) return 420;
+  if (itemCount <= 12) return 460;
+  return 500; // For 12+ items
 };
 
 /**

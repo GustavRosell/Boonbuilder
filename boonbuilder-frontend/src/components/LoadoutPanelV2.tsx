@@ -57,6 +57,10 @@ interface LoadoutPanelV2Props {
   arcanaCards: ArcanaCardSelection[];
   maxGrasp: number;
 
+  // Available special boons (eligible but not selected)
+  availableDuoBoons: AvailableBoon[];
+  availableLegendaryBoons: AvailableBoon[];
+
   // Handlers
   onRemoveWeapon: () => void;
   onRemoveFamiliar: () => void;
@@ -64,6 +68,8 @@ interface LoadoutPanelV2Props {
   onRemoveNonCoreBoon: (boonId: number) => void;
   onRemoveDuoBoon: (boonId: number) => void;
   onRemoveLegendaryBoon: (boonId: number) => void;
+  onSelectDuoBoon: (boon: AvailableBoon) => void;
+  onSelectLegendaryBoon: (boon: AvailableBoon) => void;
   onPinBoon: (boon: Boon | AvailableBoon) => void;
   onOpenKeepsakeModal: () => void;
   onOpenArcanaModal: () => void;
@@ -72,10 +78,6 @@ interface LoadoutPanelV2Props {
   hoveredBoon: Boon | AvailableBoon | null;
   pinnedBoon: Boon | AvailableBoon | null;
   setHoveredBoon: (boon: Boon | AvailableBoon | null) => void;
-
-  // Available special boons count
-  eligibleDuoCount: number;
-  eligibleLegendaryCount: number;
 }
 
 // Slot display names (game-accurate)
@@ -145,27 +147,54 @@ const LoadoutPanelV2: React.FC<LoadoutPanelV2Props> = ({
   keepsake,
   arcanaCards,
   maxGrasp,
+  availableDuoBoons,
+  availableLegendaryBoons,
   onRemoveWeapon,
   onRemoveFamiliar,
   onRemoveCoreBoon,
   onRemoveNonCoreBoon,
   onRemoveDuoBoon,
   onRemoveLegendaryBoon,
+  onSelectDuoBoon,
+  onSelectLegendaryBoon,
   onPinBoon,
   onOpenKeepsakeModal,
   onOpenArcanaModal,
   hoveredBoon,
   pinnedBoon,
-  setHoveredBoon,
-  eligibleDuoCount,
-  eligibleLegendaryCount
+  setHoveredBoon
 }) => {
+  // Track dismissed available boons (don't show until user clicks "+x available" again)
+  const [dismissedDuoBoons, setDismissedDuoBoons] = React.useState<Set<number>>(new Set());
+  const [dismissedLegendaryBoons, setDismissedLegendaryBoons] = React.useState<Set<number>>(new Set());
 
   const elementCounts = calculateElementCounts(coreBoons);
 
   // Calculate current Grasp usage
   const currentGrasp = arcanaCards.reduce((sum, s) => sum + s.card.graspCost, 0);
   const isOverGraspLimit = currentGrasp > maxGrasp;
+
+  // Filter available boons to exclude dismissed ones
+  const visibleAvailableDuoBoons = availableDuoBoons.filter(b => !dismissedDuoBoons.has(b.boonId));
+  const visibleAvailableLegendaryBoons = availableLegendaryBoons.filter(b => !dismissedLegendaryBoons.has(b.boonId));
+
+  // Handlers for dismissing available boons
+  const handleDismissDuoBoon = (boonId: number) => {
+    setDismissedDuoBoons(prev => new Set(prev).add(boonId));
+  };
+
+  const handleDismissLegendaryBoon = (boonId: number) => {
+    setDismissedLegendaryBoons(prev => new Set(prev).add(boonId));
+  };
+
+  // Handler for showing all available boons again (when clicking "+x available")
+  const handleShowAllDuoBoons = () => {
+    setDismissedDuoBoons(new Set());
+  };
+
+  const handleShowAllLegendaryBoons = () => {
+    setDismissedLegendaryBoons(new Set());
+  };
 
   return (
     <div className="bg-gray-950/90 backdrop-blur-sm border-4 border-purple-500/30 rounded-2xl p-5 h-full overflow-auto shadow-2xl shadow-purple-500/10">
@@ -420,23 +449,25 @@ const LoadoutPanelV2: React.FC<LoadoutPanelV2Props> = ({
           </div>
 
           {/* Duo Boons - 15% height, scrollable */}
-          <div className={`flex flex-col overflow-hidden ${
-            eligibleDuoCount > 0 ? 'animate-pulse-subtle' : ''
-          }`}>
-            <div className="flex items-center justify-between mb-2 flex-shrink-0">
-              <div className="text-sm text-yellow-300 font-semibold flex items-center gap-2">
-                <span>Duo Boons</span>
-                <span className="text-xs text-gray-400">({duoBoons.length})</span>
+          <div className="flex flex-col overflow-hidden">
+            <div className="w-full text-center mb-2 flex-shrink-0">
+              <div className="text-sm text-yellow-300 font-semibold">
+                Duo Boons ({duoBoons.length})
               </div>
-              {eligibleDuoCount > 0 && (
-                <div className="text-xs text-green-400 font-bold px-2 py-1 bg-green-900/20 rounded border border-green-500/30">
-                  +{eligibleDuoCount} available
-                </div>
+              {visibleAvailableDuoBoons.length > 0 && (
+                <button
+                  onClick={handleShowAllDuoBoons}
+                  className="text-xs text-green-400 font-bold px-2 py-0.5 bg-green-900/20 rounded border border-green-500/30 hover:bg-green-900/30 transition-colors mt-1"
+                  title="Available boons can be added based on your current build"
+                >
+                  +{visibleAvailableDuoBoons.length} available
+                </button>
               )}
             </div>
             <div className="flex-1 overflow-x-auto overflow-y-hidden pr-1">
-              {duoBoons.length > 0 ? (
+              {(duoBoons.length > 0 || visibleAvailableDuoBoons.length > 0) ? (
                 <div className="flex gap-2 h-full items-start">
+                  {/* Selected Duo Boons */}
                   {duoBoons.map(d => {
                     const isPinned = isBoonPinned(d, pinnedBoon);
                     return (
@@ -456,6 +487,48 @@ const LoadoutPanelV2: React.FC<LoadoutPanelV2Props> = ({
                         <button
                           onClick={() => onRemoveDuoBoon(d.boonId)}
                           className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    );
+                  })}
+                  {/* Available Duo Boons (pulsing green glow) */}
+                  {visibleAvailableDuoBoons.map(d => {
+                    const isPinned = isBoonPinned(d, pinnedBoon);
+                    return (
+                      <div key={`available-${d.boonId}`} className="relative group flex-shrink-0">
+                        <div
+                          className={`w-12 h-12 rounded-lg cursor-pointer transition-all animate-pulse ${
+                            isPinned
+                              ? 'bg-purple-600/30 border-4 border-purple-500/70 shadow-xl shadow-purple-500/30'
+                              : 'bg-green-900/30 border-2 border-green-500/60 hover:border-green-400/80 shadow-lg shadow-green-500/50'
+                          }`}
+                          onMouseEnter={() => setHoveredBoon(d)}
+                          onMouseLeave={() => setHoveredBoon(null)}
+                          onClick={() => onPinBoon(d)}
+                        >
+                          <img src={d.iconUrl} alt={d.name} className="w-full h-full object-cover rounded-lg" />
+                        </div>
+                        {/* Add button (green +) */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectDuoBoon(d);
+                          }}
+                          className="absolute -top-1 -left-1 w-5 h-5 bg-green-500 rounded-full text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg font-bold"
+                          title="Add to build"
+                        >
+                          +
+                        </button>
+                        {/* Dismiss button (×) */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDismissDuoBoon(d.boonId);
+                          }}
+                          className="absolute -top-1 -right-1 w-4 h-4 bg-gray-600 rounded-full text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
+                          title="Dismiss"
                         >
                           ×
                         </button>

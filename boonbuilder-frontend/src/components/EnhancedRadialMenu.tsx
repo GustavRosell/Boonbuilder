@@ -342,10 +342,10 @@ const EnhancedRadialMenu: React.FC<EnhancedRadialMenuProps> = ({
         <button
           onClick={() => handleTabChange('core')}
           className={`
-            px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium
+            px-5 py-2.5 rounded-lg transition-all text-sm font-medium
             ${activeTab === 'core'
-              ? 'bg-purple-600/40 border-purple-400 text-purple-200'
-              : 'bg-gray-800/40 border-gray-600 text-gray-400 hover:bg-gray-700/40'
+              ? 'bg-purple-600/50 border-3 border-purple-400 text-purple-100 shadow-lg shadow-purple-500/50 scale-105'
+              : 'bg-gray-800/40 border-2 border-gray-600 text-gray-400 hover:bg-gray-700/40'
             }
           `}
         >
@@ -354,10 +354,10 @@ const EnhancedRadialMenu: React.FC<EnhancedRadialMenuProps> = ({
         <button
           onClick={() => handleTabChange('non-core')}
           className={`
-            px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium
+            px-5 py-2.5 rounded-lg transition-all text-sm font-medium
             ${activeTab === 'non-core'
-              ? 'bg-purple-600/40 border-purple-400 text-purple-200'
-              : 'bg-gray-800/40 border-gray-600 text-gray-400 hover:bg-gray-700/40'
+              ? 'bg-purple-600/50 border-3 border-purple-400 text-purple-100 shadow-lg shadow-purple-500/50 scale-105'
+              : 'bg-gray-800/40 border-2 border-gray-600 text-gray-400 hover:bg-gray-700/40'
             }
           `}
         >
@@ -366,10 +366,10 @@ const EnhancedRadialMenu: React.FC<EnhancedRadialMenuProps> = ({
         <button
           onClick={() => handleTabChange('special')}
           className={`
-            px-4 py-2 rounded-lg border-2 transition-all text-sm font-medium
+            px-5 py-2.5 rounded-lg transition-all text-sm font-medium
             ${activeTab === 'special'
-              ? 'bg-purple-600/40 border-purple-400 text-purple-200'
-              : 'bg-gray-800/40 border-gray-600 text-gray-400 hover:bg-gray-700/40'
+              ? 'bg-purple-600/50 border-3 border-purple-400 text-purple-100 shadow-lg shadow-purple-500/50 scale-105'
+              : 'bg-gray-800/40 border-2 border-gray-600 text-gray-400 hover:bg-gray-700/40'
             }
           `}
         >
